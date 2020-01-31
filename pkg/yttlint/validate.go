@@ -278,6 +278,16 @@ func convert(value interface{}) map[string]interface{} {
 			"type":  "integer",
 			"const": v,
 		}
+	case int32:
+		return map[string]interface{}{
+			"type":  "integer",
+			"const": v,
+		}
+	case int64:
+		return map[string]interface{}{
+			"type":  "integer",
+			"const": v,
+		}
 	case *magicType:
 		return map[string]interface{}{
 			"type":  "magic",
@@ -379,6 +389,17 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []error {
 				magic := subSchema["magic"].(*magicType)
 				if !(magic.CouldBeString && !magic.CouldBeInt && !magic.CouldBeFloat) {
 					errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected string got a computed value. Tip: use str(...) to convert to string`, path))
+				}
+			} else {
+				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema["type"]))
+			}
+		}
+	case "integer":
+		if subSchema["type"] != "integer" {
+			if subSchema["type"] == "magic" {
+				magic := subSchema["magic"].(*magicType)
+				if !(magic.CouldBeInt && !magic.CouldBeString && !magic.CouldBeFloat) {
+					errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected integer got a computed value. Tip: use int(...) to convert to int`, path))
 				}
 			} else {
 				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema["type"]))

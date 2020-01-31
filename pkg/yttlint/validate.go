@@ -208,6 +208,7 @@ func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTempl
 				fmt.Printf("error: %v\n", err)
 			}
 		}
+		fmt.Println()
 	}
 
 	return docSet, compiledTemplate
@@ -291,24 +292,33 @@ func convert(value interface{}) map[string]interface{} {
 
 }
 
+func getAndCast(in map[string]interface{}, key string) (map[string]interface{}, int) {
+	prop, ok := in[key]
+	if !ok {
+		return map[string]interface{}{}, 1
+	}
+	properties, ok := prop.(map[string]interface{})
+	if !ok {
+		return nil, 2
+	}
+
+	return properties, 0
+}
+
 func isSubset(subSchema, schema map[string]interface{}, path string) []error {
 	errors := make([]error, 0)
 
 	switch schema["type"] {
 	case "object":
-		prop, ok := schema["properties"]
-		if !ok {
-			prop = map[string]interface{}{}
-		}
-		properties, ok := prop.(map[string]interface{})
-		if !ok {
+		properties, code := getAndCast(schema, "properties")
+		if code == 2 {
 			errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast properties: %v", path, schema["properties"]))
 		} else {
-			for key, prop := range properties {
-				subProps, ok := subSchema["properties"].(map[string]interface{})
-				if !ok {
-					errors = append(errors, appendLocationIfKnownf(subSchema, "%s.%s can't cast subschema properties: %v", path, key, subSchema["properties"]))
-				} else {
+			subProps, ok := subSchema["properties"].(map[string]interface{})
+			if !ok {
+				errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast subschema properties: %v", path, subSchema["properties"]))
+			} else {
+				for key, prop := range properties {
 					subProp := subProps[key]
 					if subProp == nil {
 						subProp = subProps["__ytt_lint_t_"+key]
@@ -326,6 +336,26 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []error {
 					} else {
 						subErrors := isSubset(subProp.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
 						errors = append(errors, subErrors...)
+					}
+				}
+
+				additionalProperties, code := getAndCast(schema, "additionalProperties")
+				if code == 2 {
+					errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast additionalProperties: %v", path, schema["additionalProperties"]))
+				} else if code == 1 {
+					for key, val := range subProps {
+						_, ok := properties[key]
+						if !ok {
+							errors = append(errors, appendLocationIfKnownf(val, "%s.%s additional properties are not permitted", path, key))
+						}
+					}
+				} else {
+					for key, val := range subProps {
+						_, ok := properties[key]
+						if !ok {
+							subErrors := isSubset(val.(map[string]interface{}), additionalProperties, fmt.Sprintf("%s.%s", path, key))
+							errors = append(errors, subErrors...)
+						}
 					}
 				}
 			}
@@ -362,12 +392,16 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []error {
 	return errors
 }
 
-func appendLocationIfKnownf(object map[string]interface{}, format string, a ...interface{}) error {
+func appendLocationIfKnownf(object interface{}, format string, a ...interface{}) error {
 	msg := fmt.Sprintf(format, a...)
 
-	if source, ok := object["source"]; ok && source.(*filepos.Position).IsKnown() {
-		pos := source.(*filepos.Position)
-		return fmt.Errorf("%s @ %s", msg, pos.AsString())
+	m, ok := object.(map[string]interface{})
+
+	if ok {
+		if source, ok := m["source"]; ok && source.(*filepos.Position).IsKnown() {
+			pos := source.(*filepos.Position)
+			return fmt.Errorf("%s @ %s", msg, pos.AsString())
+		}
 	}
 
 	return errors.New(msg)

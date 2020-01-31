@@ -127,6 +127,7 @@ func injectIfHandling(val interface{}) {
 
 	case string:
 	case int:
+	case bool:
 
 	default:
 		panic(fmt.Sprintf("unsupported type hit injectIfHandling %T", typedVal))
@@ -187,15 +188,15 @@ func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTempl
 	//fmt.Printf("%s\n", schemaBytes)
 
 	for _, doc := range newVal.(*yamlmeta.DocumentSet).Items {
-		kind := extraceKind(doc)
+		kind := extractKind(doc)
 		if kind == "" {
 			continue
 			// TODO: print warning if not a trivial document
 		}
 		schema, err := loadSchema(kind)
 		if err != nil {
-			fmt.Printf(err.Error())
-			os.Exit(1)
+			fmt.Printf("Error loading schema for kind %s: %v\n", kind, err.Error())
+			continue
 		}
 
 		subSchema := convert(doc.Value)
@@ -214,8 +215,11 @@ func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTempl
 	return docSet, compiledTemplate
 }
 
-func extraceKind(doc *yamlmeta.Document) string {
-	m := doc.Value.(*yamlmeta.Map)
+func extractKind(doc *yamlmeta.Document) string {
+	m, ok := doc.Value.(*yamlmeta.Map)
+	if !ok {
+		return ""
+	}
 	for _, item := range m.Items {
 		if item.Key == "kind" {
 			return item.Value.(string)

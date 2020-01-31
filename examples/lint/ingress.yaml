@@ -8,8 +8,10 @@ kind: Ingress
 metadata:
   #@ if data.values.not_error:
   name: example-ingress
+  namespace: 4
   #@ else:
   name: 5
+  namespace: example
   #@ end
   annotations:
     ingress.kubernetes.io/rewrite-target: /

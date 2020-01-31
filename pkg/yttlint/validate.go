@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/k14s/ytt/pkg/filepos"
 	"github.com/k14s/ytt/pkg/template"
@@ -57,6 +58,81 @@ func (l myTemplateLoader) ListData(
 	return nil, fmt.Errorf("ListData is not supported")
 }
 
+func isIf(meta *yamlmeta.Meta) bool {
+	// TODO: ignore whitespace
+	return strings.HasPrefix(meta.Data, "@ if ")
+}
+
+func isElse(meta *yamlmeta.Meta) bool {
+	// TODO: ignore whitespace
+	return strings.HasPrefix(meta.Data, "@ else:")
+}
+
+func isEnd(meta *yamlmeta.Meta) bool {
+	// TODO: ignore whitespace
+	return strings.HasPrefix(meta.Data, "@ end")
+}
+
+func injectIfHandling(val interface{}) {
+	if val == nil {
+		return
+	}
+
+	switch typedVal := val.(type) {
+	case *yamlmeta.DocumentSet:
+		//injectIfHandling(typedVal.Metas)
+		for _, item := range typedVal.Items {
+			injectIfHandling(item)
+		}
+
+	case *yamlmeta.Map:
+
+		prefix := ""
+		for _, item := range typedVal.Items {
+			for _, meta := range item.Metas {
+				if isIf(meta) {
+					prefix = "__ytt_lint_t_"
+
+				}
+				if isElse(meta) {
+					prefix = "__ytt_lint_f_"
+					item.Metas = []*yamlmeta.Meta{}
+				}
+				if isEnd(meta) {
+					prefix = ""
+				}
+			}
+			item.Key = prefix + fmt.Sprint(item.Key)
+		}
+
+		for _, item := range typedVal.Items {
+			injectIfHandling(item)
+		}
+	case *yamlmeta.MapItem:
+		injectIfHandling(typedVal.Key)
+		injectIfHandling(typedVal.Value)
+
+	case *yamlmeta.Array:
+		//injectIfHandling(typedVal.Metas)
+		for _, item := range typedVal.Items {
+			injectIfHandling(item)
+		}
+	case *yamlmeta.ArrayItem:
+		//injectIfHandling(typedVal.Metas)
+		injectIfHandling(typedVal.Value)
+
+	case *yamlmeta.Document:
+		//injectIfHandling(typedVal.Metas)
+		injectIfHandling(typedVal.Value)
+
+	case string:
+	case int:
+
+	default:
+		panic(fmt.Sprintf("unsupported type hit injectIfHandling %T", typedVal))
+	}
+}
+
 // Lint applies linting to a given ytt template
 func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTemplate) {
 	docSet, err := yamlmeta.NewDocumentSetFromBytes([]byte(data), yamlmeta.DocSetOpts{AssociatedName: filename})
@@ -65,14 +141,16 @@ func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTempl
 		os.Exit(1)
 	}
 
+	//fmt.Printf("### ast:\n")
+	//docSet.Print(os.Stdout)
+	injectIfHandling(docSet)
+	//docSet.Print(os.Stdout)
+
 	compiledTemplate, err := yamltemplate.NewTemplate(filename, yamltemplate.TemplateOpts{}).Compile(docSet)
 	if err != nil {
 		fmt.Printf("NewTemplate: %s\n", err.Error())
 		os.Exit(1)
 	}
-
-	//fmt.Printf("### ast:\n")
-	//docSet.Print(os.Stdout)
 
 	//fmt.Printf("### template:\n%s\n", compiledTemplate.DebugCodeAsString())
 
@@ -217,6 +295,16 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []error {
 				} else {
 					subProp := subProps[key]
 					if subProp == nil {
+						subProp = subProps["__ytt_lint_t_"+key]
+						if subProp != nil {
+							subErrors := isSubset(subProp.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
+							errors = append(errors, subErrors...)
+						}
+						subProp = subProps["__ytt_lint_f_"+key]
+						if subProp != nil {
+							subErrors := isSubset(subProp.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
+							errors = append(errors, subErrors...)
+						}
 						//fmt.Printf("subProp(%v) == nil\n", key)
 						// TODO: check required
 					} else {

@@ -5,13 +5,22 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
-const schema = `/go/src/github.com/k14s/ytt/k8s-schema/ingress.json`
+const schemaDir = `/go/src/github.com/k14s/ytt/k8s-schema/`
 
-func loadSchema() (map[string]interface{}, error) {
+var schemaCache map[string]map[string]interface{}
 
-	scheamFile, err := os.Open(os.Getenv("HOME") + "/" + schema)
+func loadSchema(kind string) (map[string]interface{}, error) {
+	kind = strings.ToLower(kind)
+
+	schema, ok := schemaCache[kind]
+	if ok {
+		return schema, nil
+	}
+
+	scheamFile, err := os.Open(os.Getenv("HOME") + "/" + schemaDir + "/" + kind + ".json")
 	if err != nil {
 		return nil, fmt.Errorf("could not open schema file: %v\nYou might need to run schema.sh first", err)
 	}
@@ -31,5 +40,10 @@ func loadSchema() (map[string]interface{}, error) {
 		return nil, fmt.Errorf("could not unmarshal schema file: %v", err)
 	}
 
+	if schemaCache == nil {
+		schemaCache = make(map[string]map[string]interface{})
+	}
+
+	schemaCache[kind] = result
 	return result, nil
 }

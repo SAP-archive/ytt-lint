@@ -186,25 +186,41 @@ func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTempl
 	//fmt.Printf("### schema\n")
 	//fmt.Printf("%s\n", schemaBytes)
 
-	schema, err := loadSchema()
-	if err != nil {
-		fmt.Printf(err.Error())
-		os.Exit(1)
-	}
+	for _, doc := range newVal.(*yamlmeta.DocumentSet).Items {
+		kind := extraceKind(doc)
+		if kind == "" {
+			continue
+			// TODO: print warning if not a trivial document
+		}
+		schema, err := loadSchema(kind)
+		if err != nil {
+			fmt.Printf(err.Error())
+			os.Exit(1)
+		}
 
-	doc := newVal.(*yamlmeta.DocumentSet).Items[0]
-	subSchema := convert(doc.Value)
+		subSchema := convert(doc.Value)
 
-	errors := isSubset(subSchema, schema, "")
-	if len(errors) == 0 {
-		fmt.Println("No errors found")
-	} else {
-		for _, err := range errors {
-			fmt.Printf("error: %v\n", err)
+		errors := isSubset(subSchema, schema, "")
+		if len(errors) == 0 {
+			fmt.Println("No errors found")
+		} else {
+			for _, err := range errors {
+				fmt.Printf("error: %v\n", err)
+			}
 		}
 	}
 
 	return docSet, compiledTemplate
+}
+
+func extraceKind(doc *yamlmeta.Document) string {
+	m := doc.Value.(*yamlmeta.Map)
+	for _, item := range m.Items {
+		if item.Key == "kind" {
+			return item.Value.(string)
+		}
+	}
+	return ""
 }
 
 type schemaPrinter struct {

@@ -385,14 +385,28 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []error {
 		}
 	case "string":
 		if subSchema["type"] != "string" {
-			if subSchema["type"] == "magic" {
-				magic := subSchema["magic"].(*magicType)
-				if !(magic.CouldBeString && !magic.CouldBeInt && !magic.CouldBeFloat) {
-					errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected string got a computed value. Tip: use str(...) to convert to string`, path))
+			format, hasFormat := schema["format"]
+
+			if hasFormat && format == "int-or-string" {
+				if subSchema["type"] == "magic" {
+					magic := subSchema["magic"].(*magicType)
+					if !((magic.CouldBeString || magic.CouldBeInt) && !magic.CouldBeFloat) {
+						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected int-or-string got a computed value. Tip: use str(...) or int(...) to convert to int or string`, path))
+					}
+				} else if subSchema["type"] != "integer" {
+					errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected int-or-string got: %s", path, subSchema["type"]))
 				}
 			} else {
-				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema["type"]))
+				if subSchema["type"] == "magic" {
+					magic := subSchema["magic"].(*magicType)
+					if !(magic.CouldBeString && !magic.CouldBeInt && !magic.CouldBeFloat) {
+						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected string got a computed value. Tip: use str(...) to convert to string`, path))
+					}
+				} else {
+					errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema["type"]))
+				}
 			}
+
 		}
 	case "integer":
 		if subSchema["type"] != "integer" {

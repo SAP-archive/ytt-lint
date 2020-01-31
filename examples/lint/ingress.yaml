@@ -1,0 +1,27 @@
+---
+#@ load("@ytt:data", "data")
+#@ def app_svc_name(app):
+#@   return app.name + "-svc"
+#@ end
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  #@ if data.values.not_error:
+  name: example-ingress
+  #@ else:
+  name: 5
+  #@ end
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - http:
+      paths:
+      #@ for/end app in data.values.apps:
+      - path: #@ "/" + app.path
+        backend:
+          serviceName: #@ app_svc_name(app)
+          servicePort: #@ app.port
+      - path: "/"
+        backend:
+          servicePort: 6

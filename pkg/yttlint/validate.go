@@ -2,7 +2,6 @@ package yttlint
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -135,7 +134,7 @@ func injectIfHandling(val interface{}) {
 }
 
 // Lint applies linting to a given ytt template
-func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTemplate) {
+func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *template.CompiledTemplate) {
 	docSet, err := yamlmeta.NewDocumentSetFromBytes([]byte(data), yamlmeta.DocSetOpts{AssociatedName: filename})
 	if err != nil {
 		fmt.Printf(err.Error())
@@ -187,6 +186,8 @@ func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTempl
 	//fmt.Printf("### schema\n")
 	//fmt.Printf("%s\n", schemaBytes)
 
+	errors := make([]LinterError, 0)
+
 	for _, doc := range newVal.(*yamlmeta.DocumentSet).Items {
 		kind := extractKind(doc)
 		if kind == "" {
@@ -201,12 +202,25 @@ func Lint(data, filename string) (*yamlmeta.DocumentSet, *template.CompiledTempl
 
 		subSchema := convert(doc.Value)
 
-		errors := isSubset(subSchema, schema, "")
+		subErrors := isSubset(subSchema, schema, "")
+		errors = append(errors, subErrors...)
+	}
+
+	switch outputFormat {
+	case "json":
+		jsonErrors, err := json.Marshal(errors)
+		if err != nil {
+			fmt.Printf("Eval: %s\n", err.Error())
+			os.Exit(1)
+		}
+		fmt.Println(string(jsonErrors))
+
+	case "human":
 		if len(errors) == 0 {
 			fmt.Println("No errors found")
 		} else {
 			for _, err := range errors {
-				fmt.Printf("error: %v\n", err)
+				fmt.Printf("error: %s @ %s\n", err.Msg, err.Pos)
 			}
 		}
 		fmt.Println()
@@ -319,8 +333,8 @@ func getAndCast(in map[string]interface{}, key string) (map[string]interface{}, 
 	return properties, 0
 }
 
-func isSubset(subSchema, schema map[string]interface{}, path string) []error {
-	errors := make([]error, 0)
+func isSubset(subSchema, schema map[string]interface{}, path string) []LinterError {
+	errors := make([]LinterError, 0)
 
 	switch schema["type"] {
 	case "object":
@@ -431,17 +445,19 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []error {
 	return errors
 }
 
-func appendLocationIfKnownf(object interface{}, format string, a ...interface{}) error {
-	msg := fmt.Sprintf(format, a...)
+func appendLocationIfKnownf(object interface{}, format string, a ...interface{}) LinterError {
+
+	lintError := lintErrorf(format, a...)
 
 	m, ok := object.(map[string]interface{})
+	lintError.Pos = ""
 
 	if ok {
 		if source, ok := m["source"]; ok && source.(*filepos.Position).IsKnown() {
 			pos := source.(*filepos.Position)
-			return fmt.Errorf("%s @ %s", msg, pos.AsString())
+			lintError.Pos = pos.AsCompactString()
 		}
 	}
 
-	return errors.New(msg)
+	return lintError
 }

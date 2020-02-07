@@ -12,7 +12,13 @@ import (
 
 func main() {
 	file := flag.String("f", "-", "File to validate")
+	outputFormat := flag.String("o", "human", "Output format: either human or json")
 	flag.Parse()
+
+	if *outputFormat != "json" && *outputFormat != "human" {
+		fmt.Fprintf(os.Stderr, "Unsupported output format '%s' use json or human\n", *outputFormat)
+		os.Exit(1)
+	}
 
 	var data []byte
 
@@ -43,5 +49,5 @@ func main() {
 		}
 
 	}
-	yttlint.Lint(string(data), *file)
+	yttlint.Lint(string(data), *file, *outputFormat)
 }

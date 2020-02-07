@@ -267,10 +267,30 @@ func convert(value interface{}) map[string]interface{} {
 		properties := make(map[string]interface{})
 		for _, item := range v.Items {
 			value := convert(item.Value)
+			key := item.Key.(string)
+
+			if strings.HasPrefix(key, "__ytt_lint_t_") || strings.HasPrefix(key, "__ytt_lint_f_") {
+				key = key[13:]
+			}
+
 			if _, ok := value["source"]; !ok && item.Position.IsKnown() {
 				value["source"] = item.Position
 			}
-			properties[item.Key.(string)] = value
+
+			_, allreadExists := properties[key]
+			if allreadExists {
+				oldValue := properties[key].(map[string]interface{})
+				anyOf, isAnyOf := oldValue["anyOf"]
+				if isAnyOf {
+					oldValue["anyOf"] = append(anyOf.([]interface{}), value)
+				} else {
+					value = map[string]interface{}{
+						"anyOf": []interface{}{oldValue, value},
+					}
+				}
+			}
+
+			properties[key] = value
 		}
 		object := map[string]interface{}{
 			"type":       "object",
@@ -343,6 +363,15 @@ func getAndCast(in map[string]interface{}, key string) (map[string]interface{}, 
 
 func isSubset(subSchema, schema map[string]interface{}, path string) []LinterError {
 	errors := make([]LinterError, 0)
+
+	anyOf, isAnyOf := subSchema["anyOf"]
+	if isAnyOf {
+		for _, item := range anyOf.([]interface{}) {
+			subErrors := isSubset(item.(map[string]interface{}), schema, path)
+			errors = append(errors, subErrors...)
+		}
+		return errors
+	}
 
 	switch schema["type"] {
 	case "object":

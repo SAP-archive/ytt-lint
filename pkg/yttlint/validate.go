@@ -436,7 +436,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 					errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected integer got a computed value. Tip: use int(...) to convert to int`, path))
 				}
 			} else {
-				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema["type"]))
+				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected integer got: %s", path, subSchema["type"]))
 			}
 		}
 

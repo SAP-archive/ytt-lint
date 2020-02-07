@@ -12,6 +12,13 @@ export function activate(context: vscode.ExtensionContext) {
 	console.log('Congratulations, your extension "ytt-lint" is now active!');
 	let timeout: NodeJS.Timer | undefined = undefined;
 
+	const SCHEMA_PATH = context.asAbsolutePath(`schema`);
+	const EXEC_PATH = context.asAbsolutePath(`bin/ytt-lint-${process.platform}`);
+	
+	if (process.platform != "win32") {
+		child_process.exec(`chmod +x "${EXEC_PATH}"`)
+	}
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -47,7 +54,9 @@ export function activate(context: vscode.ExtensionContext) {
 		let diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map();
 
 		// TODO: use spwan and then stream
-		let linter = child_process.execFile('/home/d060677/go/src/github.com/k14s/ytt/ytt-lint', ['-f', '-', '-o', 'json'], (error, stdout, stderr) => {
+		let linter = child_process.execFile(EXEC_PATH, ['-f', '-', '-o', 'json'], {
+			env: Object.assign({YTT_LINT_SCHEMA_PATH: SCHEMA_PATH}, process.env)
+		}, (error, stdout, stderr) => {
 			vscode.window.showInformationMessage(stdout);
 			let errors = JSON.parse(stdout);
 			

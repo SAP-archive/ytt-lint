@@ -95,6 +95,7 @@ func injectIfHandling(val interface{}) {
 				}
 				if isElse(meta) {
 					prefix = "__ytt_lint_f_"
+					// FIXME: do proper filtering
 					item.Metas = []*yamlmeta.Meta{}
 				}
 				if isEnd(meta) {
@@ -144,6 +145,7 @@ func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *t
 	//fmt.Printf("### ast:\n")
 	//docSet.Print(os.Stdout)
 	injectIfHandling(docSet)
+	injectStringTemplateHandling(docSet)
 	//docSet.Print(os.Stdout)
 
 	compiledTemplate, err := yamltemplate.NewTemplate(filename, yamltemplate.TemplateOpts{}).Compile(docSet)

@@ -24,9 +24,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	});
 
-	let diagnosticCollection = vscode.languages.createDiagnosticCollection();
-
+	let diagnosticCollection = vscode.languages.createDiagnosticCollection('ytt-lint');
+	
 	context.subscriptions.push(disposable);
+	context.subscriptions.push(diagnosticCollection);
 
 	function lint() {
 		if (activeEditor == null) {
@@ -35,16 +36,42 @@ export function activate(context: vscode.ExtensionContext) {
 		if (activeEditor.document.languageId != "yaml") {
 			return;
 		}
+		let doc = activeEditor.document;
 
 		// TODO: don't use '-f -' if file is saved
-		let yaml = activeEditor.document.getText();
+		let yaml = doc.getText();
 
 		vscode.window.showInformationMessage('Running lint now!');
 
+		diagnosticCollection.clear();
+		let diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map();
+
 		// TODO: use spwan and then stream
 		let linter = child_process.execFile('/home/d060677/go/src/github.com/k14s/ytt/ytt-lint', ['-f', '-', '-o', 'json'], (error, stdout, stderr) => {
-			//JSON.parse(stdout);
 			vscode.window.showInformationMessage(stdout);
+			let errors = JSON.parse(stdout);
+			
+			errors.forEach(error => {
+				let [file, l] = error.pos.split(":");
+				let lineNum = parseInt(l) - 1;
+				//let canonicalFile = vscode.Uri.file(file).toString();
+				let canonicalFile = doc.uri.toString();
+
+				let line = doc.lineAt(lineNum);
+				let start = line.firstNonWhitespaceCharacterIndex;
+				let end = line.range.end.character;
+				//let range = line.range;
+				//range.start = line.firstNonWhitespaceCharacterIndex;
+
+				let range = new vscode.Range(lineNum, start, lineNum, end);
+				let diagnostics = diagnosticMap.get(canonicalFile);
+				if (!diagnostics) { diagnostics = []; }
+				diagnostics.push(new vscode.Diagnostic(range, error.msg /*TODO: , error.severity*/));
+				diagnosticMap.set(canonicalFile, diagnostics);
+			});
+			diagnosticMap.forEach((diags, file) => {
+				diagnosticCollection.set(vscode.Uri.parse(file), diags);
+			});
 
 		});
 		linter.stdin?.write(yaml);

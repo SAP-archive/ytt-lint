@@ -20,7 +20,13 @@ func loadSchema(kind string) (map[string]interface{}, error) {
 		return schema, nil
 	}
 
-	scheamFile, err := os.Open(os.Getenv("HOME") + "/" + schemaDir + "/" + kind + ".json")
+	var schemaFileName string
+	if path, ok := os.LookupEnv("YTT_LINT_SCHEMA_PATH"); ok {
+		schemaFileName = path + "/" + kind + ".json"
+	} else {
+		schemaFileName = os.Getenv("HOME") + "/" + schemaDir + "/" + kind + ".json"
+	}
+	scheamFile, err := os.Open(schemaFileName)
 	if err != nil {
 		return nil, fmt.Errorf("could not open schema file: %v\nYou might need to run schema.sh first", err)
 	}

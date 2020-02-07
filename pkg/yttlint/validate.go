@@ -191,14 +191,15 @@ func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *t
 	errors := make([]LinterError, 0)
 
 	for _, doc := range newVal.(*yamlmeta.DocumentSet).Items {
-		kind := extractKind(doc)
+		kind, item := extractKind(doc)
 		if kind == "" {
 			continue
 			// TODO: print warning if not a trivial document
 		}
 		schema, err := loadSchema(kind)
 		if err != nil {
-			fmt.Printf("Error loading schema for kind %s: %v\n", kind, err.Error())
+			errors = append(errors,
+				appendLocationIfKnownf(item, "Error loading schema for kind %s: %v\n", kind, err.Error()))
 			continue
 		}
 
@@ -231,17 +232,17 @@ func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *t
 	return docSet, compiledTemplate
 }
 
-func extractKind(doc *yamlmeta.Document) string {
+func extractKind(doc *yamlmeta.Document) (string, *yamlmeta.MapItem) {
 	m, ok := doc.Value.(*yamlmeta.Map)
 	if !ok {
-		return ""
+		return "", nil
 	}
 	for _, item := range m.Items {
 		if item.Key == "kind" {
-			return item.Value.(string)
+			return item.Value.(string), item
 		}
 	}
-	return ""
+	return "", nil
 }
 
 type schemaPrinter struct {
@@ -468,6 +469,11 @@ func appendLocationIfKnownf(object interface{}, format string, a ...interface{})
 			pos := source.(*filepos.Position)
 			lintError.Pos = pos.AsCompactString()
 		}
+	}
+
+	mi, ok := object.(*yamlmeta.MapItem)
+	if ok && mi.Position.IsKnown() {
+		lintError.Pos = mi.Position.AsCompactString()
 	}
 
 	return lintError

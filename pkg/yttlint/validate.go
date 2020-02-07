@@ -308,6 +308,11 @@ func convert(value interface{}) map[string]interface{} {
 			"type":  "integer",
 			"const": v,
 		}
+	case bool:
+		return map[string]interface{}{
+			"type":  "boolean",
+			"const": v,
+		}
 	case *magicType:
 		return map[string]interface{}{
 			"type":  "magic",
@@ -438,6 +443,10 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 			} else {
 				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected integer got: %s", path, subSchema["type"]))
 			}
+		}
+	case "boolean":
+		if subSchema["type"] != "boolean" {
+			errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected boolean got: %s", path, subSchema["type"]))
 		}
 
 	default:

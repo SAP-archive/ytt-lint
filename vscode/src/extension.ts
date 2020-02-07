@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 			vscode.window.showInformationMessage(stdout);
 			let errors = JSON.parse(stdout);
 			
-			errors.forEach(error => {
+			errors.forEach((error: { pos: string; msg: string; }) => {
 				let [file, l] = error.pos.split(":");
 				let lineNum = parseInt(l) - 1;
 				//let canonicalFile = vscode.Uri.file(file).toString();

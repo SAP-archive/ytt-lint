@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/k14s/ytt/pkg/yttlint"
+	"github.com/phil9909/ytt-lint/pkg/yttlint"
 )
 
 func main() {

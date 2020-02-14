@@ -11,7 +11,7 @@
 		"vscode": "^1.41.0"
 	},
 	"categories": [
-		"Other"
+		"Linters"
 	],
 	"activationEvents": [
 		"onCommand:extension.helloWorld",

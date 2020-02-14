@@ -206,6 +206,10 @@ func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *t
 		}
 
 		subSchema := convert(doc.Value)
+		if _, ok := subSchema["source"]; !ok && doc.Position.IsKnown() {
+			doc.Position.SetFile(filename)
+			subSchema["source"] = doc.Position
+		}
 
 		subErrors := isSubset(subSchema, schema, "")
 		errors = append(errors, subErrors...)

@@ -303,7 +303,13 @@ func convert(value interface{}) map[string]interface{} {
 	case *yamlmeta.Array:
 		items := make([]interface{}, 0, len(v.Items))
 		for _, item := range v.Items {
-			items = append(items, convert(item.Value))
+			convertedItem := convert(item.Value)
+
+			if _, ok := convertedItem["source"]; !ok && item.Position.IsKnown() {
+				convertedItem["source"] = item.Position
+			}
+
+			items = append(items, convertedItem)
 		}
 		object := map[string]interface{}{
 			"type":  "array",
@@ -388,15 +394,27 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 				for key, prop := range properties {
 					subProp := subProps[key]
 					if subProp == nil {
-						subProp = subProps["__ytt_lint_t_"+key]
-						if subProp != nil {
-							subErrors := isSubset(subProp.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
+						subPropT := subProps["__ytt_lint_t_"+key]
+						if subPropT != nil {
+							subErrors := isSubset(subPropT.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
 							errors = append(errors, subErrors...)
 						}
-						subProp = subProps["__ytt_lint_f_"+key]
-						if subProp != nil {
-							subErrors := isSubset(subProp.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
+						subPropF := subProps["__ytt_lint_f_"+key]
+						if subPropF != nil {
+							subErrors := isSubset(subPropF.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
 							errors = append(errors, subErrors...)
+						}
+
+						if subPropF == nil || subPropT == nil {
+							r, ok := schema["required"]
+							if ok {
+								required := r.([]interface{})
+								for _, requiredKey := range required {
+									if requiredKey == key {
+										errors = append(errors, appendLocationIfKnownf(subSchema, "%s missing required entry %s", path, key))
+									}
+								}
+							}
 						}
 						//fmt.Printf("subProp(%v) == nil\n", key)
 						// TODO: check required

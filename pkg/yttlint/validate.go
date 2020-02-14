@@ -193,15 +193,15 @@ func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *t
 	errors := make([]LinterError, 0)
 
 	for _, doc := range newVal.(*yamlmeta.DocumentSet).Items {
-		kind, item := extractKind(doc)
-		if kind == "" {
+		gvk, item := extractKind(doc)
+		if gvk.kind == "" {
 			continue
 			// TODO: print warning if not a trivial document
 		}
-		schema, err := loadSchema(kind)
+		schema, err := loadSchema(gvk)
 		if err != nil {
 			errors = append(errors,
-				appendLocationIfKnownf(item, "Error loading schema for kind %s: %v\n", kind, err.Error()))
+				appendLocationIfKnownf(item, "Error loading schema for kind %s: %v\n", gvk.kind, err.Error()))
 			continue
 		}
 
@@ -238,17 +238,35 @@ func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *t
 	return docSet, compiledTemplate
 }
 
-func extractKind(doc *yamlmeta.Document) (string, *yamlmeta.MapItem) {
+func extractKind(doc *yamlmeta.Document) (kubernetesGVK, *yamlmeta.MapItem) {
+	var gvk kubernetesGVK
+	var loc *yamlmeta.MapItem
+
 	m, ok := doc.Value.(*yamlmeta.Map)
 	if !ok {
-		return "", nil
+		return gvk, nil
 	}
 	for _, item := range m.Items {
 		if item.Key == "kind" {
-			return item.Value.(string), item
+			gvk.kind = item.Value.(string)
+			loc = item
+		} else if item.Key == "apiVersion" {
+			gv := strings.SplitN(item.Value.(string), "/", 2)
+			if len(gv) == 1 {
+				gvk.group = "core"
+				gvk.version = gv[0]
+			} else {
+				gvk.group = gv[0]
+				gvk.version = gv[1]
+			}
 		}
 	}
-	return "", nil
+	if gvk.group == "" || gvk.kind == "" || gvk.version == "" {
+		gvk.group = ""
+		gvk.kind = ""
+		gvk.version = ""
+	}
+	return gvk, loc
 }
 
 type schemaPrinter struct {

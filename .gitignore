@@ -3,5 +3,5 @@
 /ytt-*
 *main
 
-/k8s-schema/
+/schema/
 /out/

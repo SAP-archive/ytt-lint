@@ -48,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 		// TODO: don't use '-f -' if file is saved
 		let yaml = doc.getText();
 
-		vscode.window.showInformationMessage('Running lint now!');
+		console.log('Running lint now!');
 
 		diagnosticCollection.clear();
 		let diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map();
@@ -57,11 +57,15 @@ export function activate(context: vscode.ExtensionContext) {
 		let linter = child_process.execFile(EXEC_PATH, ['-f', '-', '-o', 'json'], {
 			env: Object.assign({YTT_LINT_SCHEMA_PATH: SCHEMA_PATH}, process.env)
 		}, (error, stdout, stderr) => {
-			vscode.window.showInformationMessage(stdout);
+			console.log('Done linting:', error, stdout, stderr);
 			let errors = JSON.parse(stdout);
 			
 			errors.forEach((error: { pos: string; msg: string; }) => {
 				let [file, l] = error.pos.split(":");
+				if (l == undefined) {
+					vscode.window.showErrorMessage(`ytt-lint has a bug: "${error.msg}" has no line info. Please open an issue.`);
+					return;
+				}
 				let lineNum = parseInt(l) - 1;
 				//let canonicalFile = vscode.Uri.file(file).toString();
 				let canonicalFile = doc.uri.toString();

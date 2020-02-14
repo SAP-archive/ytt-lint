@@ -148,7 +148,9 @@ func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *t
 	injectStringTemplateHandling(docSet)
 	//docSet.Print(os.Stdout)
 
-	compiledTemplate, err := yamltemplate.NewTemplate(filename, yamltemplate.TemplateOpts{}).Compile(docSet)
+	compiledTemplate, err := yamltemplate.NewTemplate(filename, yamltemplate.TemplateOpts{
+		IgnoreUnknownComments: true,
+	}).Compile(docSet)
 	if err != nil {
 		fmt.Printf("NewTemplate: %s\n", err.Error())
 		os.Exit(1)

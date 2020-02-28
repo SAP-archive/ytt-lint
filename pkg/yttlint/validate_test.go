@@ -37,3 +37,22 @@ func TestValidate(t *testing.T) {
 		},
 	))
 }
+
+func TestValidateInvalidYAML(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	data, err := ioutil.ReadFile("../../examples/lint/invalid-yaml.yaml")
+
+	if err != nil {
+		t.Fatalf("Could not read test file %v", err)
+	}
+
+	errors := Lint(string(data), "test", "json")
+
+	g.Expect(errors).To(ConsistOf(
+		LinterError{
+			Msg: "mapping values are not allowed in this context",
+			Pos: "test:3",
+		},
+	))
+}

@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/k14s/ytt/pkg/filepos"
@@ -134,12 +136,53 @@ func injectIfHandling(val interface{}) {
 	}
 }
 
+var (
+	lineErrRegexp = regexp.MustCompile(`^yaml: line (?P<num>\d+): (?P<msg>.+)$`)
+)
+
 // Lint applies linting to a given ytt template
 func Lint(data, filename string, outputFormat string) []LinterError {
+	errors := lint(data, filename)
+
+	switch outputFormat {
+	case "json":
+		jsonErrors, err := json.Marshal(errors)
+		if err != nil {
+			fmt.Printf("Eval: %s\n", err.Error())
+			os.Exit(1)
+		}
+		fmt.Println(string(jsonErrors))
+
+	case "human":
+		if len(errors) == 0 {
+			fmt.Println("No errors found")
+		} else {
+			for _, err := range errors {
+				fmt.Printf("error: %s @ %s\n", err.Msg, err.Pos)
+			}
+		}
+		fmt.Println()
+	}
+
+	return errors
+}
+
+func lint(data, filename string) []LinterError {
 	docSet, err := yamlmeta.NewDocumentSetFromBytes([]byte(data), yamlmeta.DocSetOpts{AssociatedName: filename})
 	if err != nil {
-		fmt.Printf(err.Error())
-		os.Exit(1)
+		msg := err.Error()
+
+		match := lineErrRegexp.FindStringSubmatch(msg)
+		line, err := strconv.Atoi(match[1])
+		if err != nil {
+			panic(err)
+		}
+		msg = match[2]
+
+		return []LinterError{{
+			Msg: msg,
+			Pos: fmt.Sprintf("%s:%d", filename, line),
+		}}
 	}
 
 	//fmt.Printf("### ast:\n")
@@ -213,26 +256,6 @@ func Lint(data, filename string, outputFormat string) []LinterError {
 
 		subErrors := isSubset(subSchema, schema, "")
 		errors = append(errors, subErrors...)
-	}
-
-	switch outputFormat {
-	case "json":
-		jsonErrors, err := json.Marshal(errors)
-		if err != nil {
-			fmt.Printf("Eval: %s\n", err.Error())
-			os.Exit(1)
-		}
-		fmt.Println(string(jsonErrors))
-
-	case "human":
-		if len(errors) == 0 {
-			fmt.Println("No errors found")
-		} else {
-			for _, err := range errors {
-				fmt.Printf("error: %s @ %s\n", err.Msg, err.Pos)
-			}
-		}
-		fmt.Println()
 	}
 
 	return errors

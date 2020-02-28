@@ -44,14 +44,13 @@ func injectStringTemplateHandling(val interface{}) {
 		injectStringTemplateHandling(typedVal.Value)
 
 	case *[]*yamlmeta.Meta:
-		drop := false
+		filtered := []*yamlmeta.Meta{}
 		for _, item := range *typedVal {
-			drop = drop || strings.Contains(item.Data, "yaml/text-templated-strings")
+			if !strings.Contains(item.Data, "yaml/text-templated-strings") {
+				filtered = append(filtered, item)
+			}
 		}
-		if drop {
-			// FIXME: do proper filtering
-			*typedVal = []*yamlmeta.Meta{}
-		}
+		*typedVal = filtered
 
 	case string:
 	case int:

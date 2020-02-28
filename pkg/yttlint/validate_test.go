@@ -56,3 +56,22 @@ func TestValidateInvalidYAML(t *testing.T) {
 		},
 	))
 }
+
+func TestValidateUnsupportedLoad(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	data, err := ioutil.ReadFile("../../examples/lint/unsupported-load.yaml")
+
+	if err != nil {
+		t.Fatalf("Could not read test file %v", err)
+	}
+
+	errors := Lint(string(data), "test", "json")
+
+	g.Expect(errors).To(ConsistOf(
+		LinterError{
+			Msg: "cannot load @ytt:assert: load(\"@ytt:assert\", ...) is not supported by ytt-lint",
+			Pos: "test:2",
+		},
+	))
+}

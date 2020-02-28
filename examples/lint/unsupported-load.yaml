@@ -1,0 +1,6 @@
+#@ load("@ytt:data", "data")
+#@ load("@ytt:assert", "assert")
+
+test:
+  a: #@ data.values.a
+  b: "b"

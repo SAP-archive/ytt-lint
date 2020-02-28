@@ -35,14 +35,18 @@ func (l myTemplateLoader) FindCompiledTemplate(module string) (*template.Compile
 func (l myTemplateLoader) Load(
 	thread *starlark.Thread, module string) (starlark.StringDict, error) {
 
-	//return nil, fmt.Errorf("Load(%s) is not supported", module)
+	switch module {
+	//case "@ytt:assert":
+	//	return yttlibrary.AssertAPI, nil
+	//case "@ytt:library":
+	//	return yttlibrary.AssertAPI, nil
+	case "@ytt:data":
+		return starlark.StringDict{
+			"data": &magicType{},
+		}, nil
+	}
 
-	thread.SetLocal("data", &magicType{})
-	//fmt.Printf("---\n%s\n+++\n", thread.CallStack().String())
-
-	return starlark.StringDict{
-		"data": &magicType{},
-	}, nil
+	return nil, fmt.Errorf(`load("%s", ...) is not supported by ytt-lint`, module)
 }
 
 func (l myTemplateLoader) LoadData(
@@ -206,6 +210,10 @@ func lint(data, filename string) []LinterError {
 
 	_, newVal, err := compiledTemplate.Eval(thread, loader)
 	if err != nil {
+		multiErr, ok := err.(template.CompiledTemplateMultiError)
+		if ok {
+			return mapMultierrorToLinterror(multiErr)
+		}
 		fmt.Printf("Eval: %s\n", err.Error())
 		os.Exit(1)
 

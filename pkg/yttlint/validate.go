@@ -135,7 +135,7 @@ func injectIfHandling(val interface{}) {
 }
 
 // Lint applies linting to a given ytt template
-func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *template.CompiledTemplate) {
+func Lint(data, filename string, outputFormat string) []LinterError {
 	docSet, err := yamlmeta.NewDocumentSetFromBytes([]byte(data), yamlmeta.DocSetOpts{AssociatedName: filename})
 	if err != nil {
 		fmt.Printf(err.Error())
@@ -235,7 +235,7 @@ func Lint(data, filename string, outputFormat string) (*yamlmeta.DocumentSet, *t
 		fmt.Println()
 	}
 
-	return docSet, compiledTemplate
+	return errors
 }
 
 func extractKind(doc *yamlmeta.Document) (kubernetesGVK, *yamlmeta.MapItem) {

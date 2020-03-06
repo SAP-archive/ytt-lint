@@ -19,7 +19,7 @@ import (
 	"github.com/k14s/ytt/pkg/yamlmeta"
 	"github.com/k14s/ytt/pkg/yamltemplate"
 	"github.com/k14s/ytt/pkg/yttlibrary"
-	"github.com/phil9909/ytt-lint/pkg/librarywrapper"
+	_ "github.com/phil9909/ytt-lint/pkg/librarywrapper" // inject into lib
 	"github.com/phil9909/ytt-lint/pkg/magic"
 	"go.starlark.net/starlark"
 )
@@ -50,8 +50,8 @@ func (l myTemplateLoader) Load(
 				"data": &magic.MagicType{},
 			}, nil
 		}
-		res, ok := l.api[module]
-		if ok {
+		res, err := l.api.FindModule(module[5:])
+		if err == nil {
 			return res, nil
 		}
 	}
@@ -613,7 +613,6 @@ func newAPI(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader templa
 	}, libraryExecutionFactory).AsModule()
 
 	api := yttlibrary.NewAPI(replaceNodeFunc, &yamlmeta.Document{}, loader, libraryModule)
-	api["@ytt:base64"] = librarywrapper.Base64APIWrapper
 
 	return api
 }

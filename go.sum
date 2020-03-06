@@ -6,6 +6,8 @@ github.com/cppforlife/cobrautil v0.0.0-20180924214100-a39a1714c920/go.mod h1:2w+
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/fsnotify/fsnotify v1.4.7/go.mod h1:jwhsz4b93w/PPRr/qN1Yymfu8t87LnFCMoQvtojpjFo=
 github.com/golang/protobuf v1.2.0/go.mod h1:6lQm79b+lXiMfvg/cZm0SGofjICqVBUtrP5yJMmIC1U=
+github.com/hashicorp/go-version v1.2.0 h1:3vNe/fWF5CBgRIguda1meWhsZHy3m8gCJ5wx+dIzX/E=
+github.com/hashicorp/go-version v1.2.0/go.mod h1:fltr4n8CU8Ke44wwGCBoEymUuxUHl09ZGVZPK5anwXA=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/k14s/starlark-go v0.0.0-20200207164905-fd8842955e4e h1:abN1rVFJgamrrznpO8d2fB9W7uJq8SCOiQALcq7Amqw=
@@ -14,6 +16,8 @@ github.com/k14s/ytt v0.25.0 h1:PC04uFfFeX1huzsNTMmlVjsfx76RXMwPVLJX9FR4EJQ=
 github.com/k14s/ytt v0.25.0/go.mod h1:I6U/0HMwB25N9lB11JhgRyxy2c6uEPsz9KVlWTwUB1g=
 github.com/k14s/ytt v0.25.1-0.20200207232124-ab89d2499e9d h1:Dy4cLWdDKoH91iq4Fx3tCiMiKUrQQx7cfI8QWvQbwKM=
 github.com/k14s/ytt v0.25.1-0.20200207232124-ab89d2499e9d/go.mod h1:kqRUQ+CxWBeTtsvxXRsMHbzj/2bOiDWZKPltzNQMfdk=
+github.com/k14s/ytt v0.26.0 h1:tWZNn5XBl+xZxX4LGIPShykXWIo3px7o6qsvHieDfJ0=
+github.com/k14s/ytt v0.26.0/go.mod h1:DiGbKbTE8ooyBoRyU6QY8w18oiUvh4EBnqWoDJEXAG0=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=

@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/phil9909/ytt-lint/pkg/yttlint"
 )
 
 func main() {
-	file := flag.String("f", "-", "File to validate")
+	var file string
+	flag.StringVar(&file, "f", "-", "File to validate")
 	outputFormat := flag.String("o", "human", "Output format: either human or json")
 	flag.Parse()
 
@@ -22,7 +24,7 @@ func main() {
 
 	var data []byte
 
-	if *file == "-" {
+	if file == "-" || strings.HasPrefix(file, "-:") {
 		var err error
 		reader := bufio.NewReader(os.Stdin)
 		data, err = ioutil.ReadAll(reader)
@@ -30,24 +32,28 @@ func main() {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
+		parts := strings.SplitN(file, ":", 2)
+		if len(parts) == 2 {
+			file = parts[1]
+		}
 
 	} else {
-		stat, err := os.Stat(*file)
+		stat, err := os.Stat(file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
 		if stat.IsDir() {
-			fmt.Fprintf(os.Stderr, "%d is a directory", file)
+			fmt.Fprintf(os.Stderr, "%s is a directory", file)
 			os.Exit(1)
 		}
 
-		data, err = ioutil.ReadFile(*file)
+		data, err = ioutil.ReadFile(file)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "%v\n", err)
 			os.Exit(1)
 		}
 
 	}
-	yttlint.Lint(string(data), *file, *outputFormat)
+	yttlint.Lint(string(data), file, *outputFormat)
 }

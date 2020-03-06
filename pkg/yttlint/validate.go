@@ -19,6 +19,8 @@ import (
 	"github.com/k14s/ytt/pkg/yamlmeta"
 	"github.com/k14s/ytt/pkg/yamltemplate"
 	"github.com/k14s/ytt/pkg/yttlibrary"
+	"github.com/phil9909/ytt-lint/pkg/librarywrapper"
+	"github.com/phil9909/ytt-lint/pkg/magic"
 	"go.starlark.net/starlark"
 )
 
@@ -45,7 +47,7 @@ func (l myTemplateLoader) Load(
 	if strings.HasPrefix(module, "@ytt:") {
 		if module == "@ytt:data" {
 			return starlark.StringDict{
-				"data": &magicType{},
+				"data": &magic.MagicType{},
 			}, nil
 		}
 		res, ok := l.api[module]
@@ -403,7 +405,7 @@ func convert(value interface{}) map[string]interface{} {
 			"type":  "boolean",
 			"const": v,
 		}
-	case *magicType:
+	case *magic.MagicType:
 		return map[string]interface{}{
 			"type":  "magic",
 			"magic": value,
@@ -525,7 +527,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 
 			if hasFormat && format == "int-or-string" {
 				if subSchema["type"] == "magic" {
-					magic := subSchema["magic"].(*magicType)
+					magic := subSchema["magic"].(*magic.MagicType)
 					if !((magic.CouldBeString || magic.CouldBeInt) && !magic.CouldBeFloat) {
 						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected int-or-string got a computed value. Tip: use str(...) or int(...) to convert to int or string`, path))
 					}
@@ -534,7 +536,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 				}
 			} else {
 				if subSchema["type"] == "magic" {
-					magic := subSchema["magic"].(*magicType)
+					magic := subSchema["magic"].(*magic.MagicType)
 					if !(magic.CouldBeString && !magic.CouldBeInt && !magic.CouldBeFloat) {
 						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected string got a computed value. Tip: use str(...) to convert to string`, path))
 					}
@@ -547,7 +549,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 	case "integer":
 		if subSchema["type"] != "integer" {
 			if subSchema["type"] == "magic" {
-				magic := subSchema["magic"].(*magicType)
+				magic := subSchema["magic"].(*magic.MagicType)
 				if !(magic.CouldBeInt && !magic.CouldBeString && !magic.CouldBeFloat) {
 					errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected integer got a computed value. Tip: use int(...) to convert to int`, path))
 				}
@@ -606,5 +608,8 @@ func newAPI(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader templa
 		Root:    rootLib,
 	}, libraryExecutionFactory).AsModule()
 
-	return yttlibrary.NewAPI(replaceNodeFunc, &yamlmeta.Document{}, loader, libraryModule)
+	api := yttlibrary.NewAPI(replaceNodeFunc, &yamlmeta.Document{}, loader, libraryModule)
+	api["@ytt:base64"] = librarywrapper.Base64APIWrapper
+
+	return api
 }

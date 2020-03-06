@@ -1,0 +1,8 @@
+---
+#@ load("@ytt:data", "data")
+#@ load("@ytt:base64", "base64")
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: example-ingress
+  namespace: #@ base64.encode(data.values.not_error)

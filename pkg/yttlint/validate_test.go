@@ -57,6 +57,20 @@ func TestValidateMagicSupportsLen(t *testing.T) {
 	))
 }
 
+func TestValidateBase64(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	data, err := ioutil.ReadFile("../../examples/lint/base64.yaml")
+
+	if err != nil {
+		t.Fatalf("Could not read test file %v", err)
+	}
+
+	errors := Lint(string(data), "test", "json")
+
+	g.Expect(errors).To(BeEmpty())
+}
+
 func TestValidateInvalidYAML(t *testing.T) {
 	g := NewGomegaWithT(t)
 

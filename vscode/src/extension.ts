@@ -54,7 +54,7 @@ export function activate(context: vscode.ExtensionContext) {
 		let diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map();
 
 		// TODO: use spwan and then stream
-		let linter = child_process.execFile(EXEC_PATH, ['-f', '-', '-o', 'json'], {
+		let linter = child_process.execFile(EXEC_PATH, ['-f', `-:${doc.fileName}`, '-o', 'json'], {
 			env: Object.assign({YTT_LINT_SCHEMA_PATH: SCHEMA_PATH}, process.env)
 		}, (error, stdout, stderr) => {
 			console.log('Done linting:', error, stdout, stderr);
@@ -62,6 +62,9 @@ export function activate(context: vscode.ExtensionContext) {
 			
 			errors.forEach((error: { pos: string; msg: string; }) => {
 				let [file, l] = error.pos.split(":");
+				if (file != doc.fileName) {
+					return;
+				}
 				if (l == undefined) {
 					vscode.window.showErrorMessage(`ytt-lint has a bug: "${error.msg}" has no line info. Please open an issue.`);
 					return;

@@ -16,15 +16,19 @@ func mapMultierrorToLinterror(multiErr template.CompiledTemplateMultiError) []Li
 		positions := errs.Index(i).FieldByName("Positions")
 		m := positions.Len()
 		for j := 0; j < m; j++ {
-			sourceLine := positions.Index(j).
-				FieldByName("TemplateLine").Elem().
-				FieldByName("SourceLine")
+			var sourceLine reflect.Value
 
-			if sourceLine.IsNil() {
-				sourceLine = positions.Index(j).
-					FieldByName("BeforeTemplateLine").Elem().
-					FieldByName("SourceLine")
+			position := positions.Index(j)
+
+			sourceLine = getSourceLine(position.FieldByName("TemplateLine"))
+
+			if !sourceLine.IsValid() || sourceLine.IsNil() {
+				sourceLine = getSourceLine(position.FieldByName("BeforeTemplateLine"))
 			}
+			if !sourceLine.IsValid() || sourceLine.IsNil() {
+				continue
+			}
+
 			pos := sourceLine.Elem().FieldByName("Position").Elem()
 			errors = append(errors, LinterError{
 				Msg: msg,
@@ -33,4 +37,11 @@ func mapMultierrorToLinterror(multiErr template.CompiledTemplateMultiError) []Li
 		}
 	}
 	return errors
+}
+
+func getSourceLine(templateLine reflect.Value) reflect.Value {
+	if !templateLine.IsNil() {
+		return templateLine.Elem().FieldByName("SourceLine")
+	}
+	return reflect.Value{}
 }

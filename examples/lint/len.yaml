@@ -1,0 +1,7 @@
+---
+#@ load("@ytt:data", "data")
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: example-ingress
+  namespace: #@ len(data.values.not_error)

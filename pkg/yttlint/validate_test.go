@@ -38,6 +38,25 @@ func TestValidate(t *testing.T) {
 	))
 }
 
+func TestValidateMagicSupportsLen(t *testing.T) {
+	g := NewGomegaWithT(t)
+
+	data, err := ioutil.ReadFile("../../examples/lint/len.yaml")
+
+	if err != nil {
+		t.Fatalf("Could not read test file %v", err)
+	}
+
+	errors := Lint(string(data), "test", "json")
+
+	g.Expect(errors).To(ConsistOf(
+		LinterError{
+			Msg: ".metadata.namespace expected string got: integer",
+			Pos: "test:7",
+		},
+	))
+}
+
 func TestValidateInvalidYAML(t *testing.T) {
 	g := NewGomegaWithT(t)
 

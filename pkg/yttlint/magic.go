@@ -63,6 +63,12 @@ func (mt *magicType) Iterate() starlark.Iterator {
 
 var _ starlark.Iterable = &magicType{}
 
+func (mt *magicType) Len() int {
+	return 42
+}
+
+var _ starlark.Sequence = &magicType{}
+
 var _ starlark.HasBinary = &magicType{}
 
 func (mt *magicType) Binary(op syntax.Token, y starlark.Value, side starlark.Side) (starlark.Value, error) {

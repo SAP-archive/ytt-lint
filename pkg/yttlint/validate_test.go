@@ -8,103 +8,78 @@ import (
 )
 
 func TestValidate(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	data, err := ioutil.ReadFile("../../examples/lint/ingress.yaml")
-
-	if err != nil {
-		t.Fatalf("Could not read test file %v", err)
+	type test struct {
+		filename          string
+		nonPedanticErrors []LinterError
+		pedanticErrors    []LinterError
 	}
 
-	errors := Lint(string(data), "test", "json")
-
-	g.Expect(errors).To(ConsistOf(
-		LinterError{
+	cases := []test{{
+		filename: "../../examples/lint/ingress.yaml",
+		nonPedanticErrors: []LinterError{{
 			Msg: ".metadata.name expected string got: integer",
 			Pos: "test:13",
-		},
-		LinterError{
+		}, {
 			Msg: ".metadata.namespace expected string got: integer",
 			Pos: "test:11",
-		},
-		LinterError{
-			Msg: ".spec.rules[0].http.paths[0].backend.servicePort expected int-or-string got a computed value. Tip: use str(...) or int(...) to convert to int or string",
-			Pos: "test:26",
-		},
-		LinterError{
+		}, {
 			Msg: ".spec.rules[0].http.paths[1].backend missing required entry serviceName",
 			Pos: "test:28",
-		},
-	))
-}
-
-func TestValidateMagicSupportsLen(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	data, err := ioutil.ReadFile("../../examples/lint/len.yaml")
-
-	if err != nil {
-		t.Fatalf("Could not read test file %v", err)
-	}
-
-	errors := Lint(string(data), "test", "json")
-
-	g.Expect(errors).To(ConsistOf(
-		LinterError{
+		}},
+		pedanticErrors: []LinterError{{
+			Msg: ".spec.rules[0].http.paths[0].backend.servicePort expected int-or-string got a computed value. Tip: use str(...) or int(...) to convert to int or string",
+			Pos: "test:26",
+		}},
+	}, {
+		filename: "../../examples/lint/len.yaml",
+		nonPedanticErrors: []LinterError{{
 			Msg: ".metadata.namespace expected string got: integer",
 			Pos: "test:7",
-		},
-	))
-}
-
-func TestValidateBase64(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	data, err := ioutil.ReadFile("../../examples/lint/base64.yaml")
-
-	if err != nil {
-		t.Fatalf("Could not read test file %v", err)
-	}
-
-	errors := Lint(string(data), "test", "json")
-
-	g.Expect(errors).To(BeEmpty())
-}
-
-func TestValidateInvalidYAML(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	data, err := ioutil.ReadFile("../../examples/lint/invalid-yaml.yaml")
-
-	if err != nil {
-		t.Fatalf("Could not read test file %v", err)
-	}
-
-	errors := Lint(string(data), "test", "json")
-
-	g.Expect(errors).To(ConsistOf(
-		LinterError{
+		}},
+		pedanticErrors: []LinterError{},
+	}, {
+		filename:          "../../examples/lint/base64.yaml",
+		nonPedanticErrors: []LinterError{},
+		pedanticErrors:    []LinterError{},
+	}, {
+		filename: "../../examples/lint/invalid-yaml.yaml",
+		nonPedanticErrors: []LinterError{{
 			Msg: "mapping values are not allowed in this context",
 			Pos: "test:3",
-		},
-	))
-}
-
-func TestValidateUnsupportedLoad(t *testing.T) {
-	g := NewGomegaWithT(t)
-
-	data, err := ioutil.ReadFile("../../examples/lint/unsupported-load.yaml")
-
-	if err != nil {
-		t.Fatalf("Could not read test file %v", err)
-	}
-
-	errors := Lint(string(data), "test", "json")
-
-	g.Expect(errors).To(ConsistOf(
-		LinterError{
+		}},
+		pedanticErrors: []LinterError{},
+	}, {
+		filename: "../../examples/lint/unsupported-load.yaml",
+		nonPedanticErrors: []LinterError{{
 			Msg: "cannot load something-else: load(\"something-else\", ...) is not supported by ytt-lint",
 			Pos: "test:2",
-		},
-	))
+		}},
+		pedanticErrors: []LinterError{},
+	}}
+
+	for _, testCase := range cases {
+
+		t.Run(testCase.filename, func(t *testing.T) {
+			g := NewGomegaWithT(t)
+
+			data, err := ioutil.ReadFile(testCase.filename)
+
+			if err != nil {
+				t.Fatalf("Could not read test file %v", err)
+			}
+
+			linter := &Linter{
+				Pedantic: false,
+			}
+			errors := linter.Lint(string(data), "test", "json")
+			g.Expect(errors).To(ConsistOf(testCase.nonPedanticErrors))
+
+			linter = &Linter{
+				Pedantic: true,
+			}
+			errors = linter.Lint(string(data), "test", "json")
+			g.Expect(errors).To(ConsistOf(append(testCase.nonPedanticErrors, testCase.pedanticErrors...)))
+		})
+
+	}
 }

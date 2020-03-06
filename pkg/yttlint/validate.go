@@ -154,9 +154,13 @@ var (
 	lineErrRegexp = regexp.MustCompile(`^yaml: line (?P<num>\d+): (?P<msg>.+)$`)
 )
 
+type Linter struct {
+	Pedantic bool
+}
+
 // Lint applies linting to a given ytt template
-func Lint(data, filename string, outputFormat string) []LinterError {
-	errors := lint(data, filename)
+func (l *Linter) Lint(data, filename string, outputFormat string) []LinterError {
+	errors := l.lint(data, filename)
 
 	switch outputFormat {
 	case "json":
@@ -181,7 +185,7 @@ func Lint(data, filename string, outputFormat string) []LinterError {
 	return errors
 }
 
-func lint(data, filename string) []LinterError {
+func (l *Linter) lint(data, filename string) []LinterError {
 	docSet, err := yamlmeta.NewDocumentSetFromBytes([]byte(data), yamlmeta.DocSetOpts{AssociatedName: filename})
 	if err != nil {
 		msg := err.Error()
@@ -272,7 +276,7 @@ func lint(data, filename string) []LinterError {
 			subSchema["source"] = doc.Position
 		}
 
-		subErrors := isSubset(subSchema, schema, "")
+		subErrors := l.isSubset(subSchema, schema, "")
 		errors = append(errors, subErrors...)
 	}
 
@@ -432,13 +436,13 @@ func getAndCast(in map[string]interface{}, key string) (map[string]interface{}, 
 	return properties, 0
 }
 
-func isSubset(subSchema, schema map[string]interface{}, path string) []LinterError {
+func (l *Linter) isSubset(subSchema, schema map[string]interface{}, path string) []LinterError {
 	errors := make([]LinterError, 0)
 
 	anyOf, isAnyOf := subSchema["anyOf"]
 	if isAnyOf {
 		for _, item := range anyOf.([]interface{}) {
-			subErrors := isSubset(item.(map[string]interface{}), schema, path)
+			subErrors := l.isSubset(item.(map[string]interface{}), schema, path)
 			errors = append(errors, subErrors...)
 		}
 		return errors
@@ -459,12 +463,12 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 					if subProp == nil {
 						subPropT := subProps["__ytt_lint_t_"+key]
 						if subPropT != nil {
-							subErrors := isSubset(subPropT.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
+							subErrors := l.isSubset(subPropT.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
 							errors = append(errors, subErrors...)
 						}
 						subPropF := subProps["__ytt_lint_f_"+key]
 						if subPropF != nil {
-							subErrors := isSubset(subPropF.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
+							subErrors := l.isSubset(subPropF.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
 							errors = append(errors, subErrors...)
 						}
 
@@ -482,7 +486,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 						//fmt.Printf("subProp(%v) == nil\n", key)
 						// TODO: check required
 					} else {
-						subErrors := isSubset(subProp.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
+						subErrors := l.isSubset(subProp.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
 						errors = append(errors, subErrors...)
 					}
 				}
@@ -501,7 +505,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 					for key, val := range subProps {
 						_, ok := properties[key]
 						if !ok {
-							subErrors := isSubset(val.(map[string]interface{}), additionalProperties, fmt.Sprintf("%s.%s", path, key))
+							subErrors := l.isSubset(val.(map[string]interface{}), additionalProperties, fmt.Sprintf("%s.%s", path, key))
 							errors = append(errors, subErrors...)
 						}
 					}
@@ -517,7 +521,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 		} else {
 			for i, item := range subItems {
 				//fmt.Println(item)
-				subErrors := isSubset(item.(map[string]interface{}), itemsSchema, fmt.Sprintf("%s[%d]", path, i))
+				subErrors := l.isSubset(item.(map[string]interface{}), itemsSchema, fmt.Sprintf("%s[%d]", path, i))
 				errors = append(errors, subErrors...)
 			}
 		}
@@ -528,7 +532,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 			if hasFormat && format == "int-or-string" {
 				if subSchema["type"] == "magic" {
 					magic := subSchema["magic"].(*magic.MagicType)
-					if !((magic.CouldBeString || magic.CouldBeInt) && !magic.CouldBeFloat) {
+					if l.Pedantic && !((magic.CouldBeString || magic.CouldBeInt) && !magic.CouldBeFloat) {
 						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected int-or-string got a computed value. Tip: use str(...) or int(...) to convert to int or string`, path))
 					}
 				} else if subSchema["type"] != "integer" {
@@ -550,7 +554,7 @@ func isSubset(subSchema, schema map[string]interface{}, path string) []LinterErr
 		if subSchema["type"] != "integer" {
 			if subSchema["type"] == "magic" {
 				magic := subSchema["magic"].(*magic.MagicType)
-				if !(magic.CouldBeInt && !magic.CouldBeString && !magic.CouldBeFloat) {
+				if l.Pedantic && !(magic.CouldBeInt && !magic.CouldBeString && !magic.CouldBeFloat) {
 					errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected integer got a computed value. Tip: use int(...) to convert to int`, path))
 				}
 			} else {

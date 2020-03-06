@@ -13,7 +13,9 @@ import (
 
 func main() {
 	var file string
+	var pedantic bool
 	flag.StringVar(&file, "f", "-", "File to validate")
+	flag.BoolVar(&pedantic, "p", false, "Use pedantic linting mode")
 	outputFormat := flag.String("o", "human", "Output format: either human or json")
 	flag.Parse()
 
@@ -55,5 +57,8 @@ func main() {
 		}
 
 	}
-	yttlint.Lint(string(data), file, *outputFormat)
+	linter := yttlint.Linter{
+		Pedantic: pedantic,
+	}
+	linter.Lint(string(data), file, *outputFormat)
 }

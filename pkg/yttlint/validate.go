@@ -5,20 +5,27 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
 
+	"github.com/k14s/ytt/pkg/cmd/core"
 	"github.com/k14s/ytt/pkg/filepos"
+	"github.com/k14s/ytt/pkg/files"
 	"github.com/k14s/ytt/pkg/template"
+	tplcore "github.com/k14s/ytt/pkg/template/core"
+	"github.com/k14s/ytt/pkg/workspace"
 	"github.com/k14s/ytt/pkg/yamlmeta"
 	"github.com/k14s/ytt/pkg/yamltemplate"
+	"github.com/k14s/ytt/pkg/yttlibrary"
 	"go.starlark.net/starlark"
 )
 
 type myTemplateLoader struct {
 	compiledTemplate *template.CompiledTemplate
 	name             string
+	api              yttlibrary.API
 }
 
 var _ template.CompiledTemplateLoader = myTemplateLoader{}
@@ -35,15 +42,16 @@ func (l myTemplateLoader) FindCompiledTemplate(module string) (*template.Compile
 func (l myTemplateLoader) Load(
 	thread *starlark.Thread, module string) (starlark.StringDict, error) {
 
-	switch module {
-	//case "@ytt:assert":
-	//	return yttlibrary.AssertAPI, nil
-	//case "@ytt:library":
-	//	return yttlibrary.AssertAPI, nil
-	case "@ytt:data":
-		return starlark.StringDict{
-			"data": &magicType{},
-		}, nil
+	if strings.HasPrefix(module, "@ytt:") {
+		if module == "@ytt:data" {
+			return starlark.StringDict{
+				"data": &magicType{},
+			}, nil
+		}
+		res, ok := l.api[module]
+		if ok {
+			return res, nil
+		}
 	}
 
 	return nil, fmt.Errorf(`load("%s", ...) is not supported by ytt-lint`, module)
@@ -204,8 +212,8 @@ func lint(data, filename string) []LinterError {
 	}
 
 	//fmt.Printf("### template:\n%s\n", compiledTemplate.DebugCodeAsString())
-
 	loader := myTemplateLoader{compiledTemplate: compiledTemplate, name: filename}
+	loader.api = newAPI(filename, compiledTemplate.TplReplaceNode, loader)
 	thread := &starlark.Thread{Name: "test", Load: loader.Load}
 
 	_, newVal, err := compiledTemplate.Eval(thread, loader)
@@ -579,4 +587,24 @@ func appendLocationIfKnownf(object interface{}, format string, a ...interface{})
 	}
 
 	return lintError
+}
+
+func newAPI(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader template.CompiledTemplateLoader) yttlibrary.API {
+	libraryExecutionFactory := workspace.NewLibraryExecutionFactory(core.NewPlainUI(false), workspace.TemplateLoaderOpts{
+		IgnoreUnknownComments: true,
+	})
+
+	inputFiles, err := files.NewSortedFilesFromPaths([]string{filepath.Dir(filename)}, files.SymlinkAllowOpts{
+		AllowAll: true,
+	})
+	if err != nil {
+		os.Exit(1)
+	}
+	rootLib := workspace.NewRootLibrary(inputFiles)
+	libraryModule := workspace.NewLibraryModule(workspace.LibraryExecutionContext{
+		Current: rootLib,
+		Root:    rootLib,
+	}, libraryExecutionFactory).AsModule()
+
+	return yttlibrary.NewAPI(replaceNodeFunc, &yamlmeta.Document{}, loader, libraryModule)
 }

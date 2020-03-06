@@ -1,5 +1,5 @@
 #@ load("@ytt:data", "data")
-#@ load("@ytt:assert", "assert")
+#@ load("something-else", "assert")
 
 test:
   a: #@ data.values.a

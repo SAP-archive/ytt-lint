@@ -70,7 +70,7 @@ func TestValidateUnsupportedLoad(t *testing.T) {
 
 	g.Expect(errors).To(ConsistOf(
 		LinterError{
-			Msg: "cannot load @ytt:assert: load(\"@ytt:assert\", ...) is not supported by ytt-lint",
+			Msg: "cannot load something-else: load(\"something-else\", ...) is not supported by ytt-lint",
 			Pos: "test:2",
 		},
 	))

@@ -93,4 +93,9 @@ func (mt *magicType) AsGoValue() interface{} {
 	return mt
 }
 
+func (mt *magicType) AsStarlarkValue() starlark.Value {
+	return mt
+}
+
 var _ core.StarlarkValueToGoValueConversion = &magicType{}
+var _ core.GoValueToStarlarkValueConversion = &magicType{}

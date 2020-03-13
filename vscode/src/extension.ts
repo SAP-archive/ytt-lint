@@ -13,7 +13,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let timeout: NodeJS.Timer | undefined = undefined;
 
 	const SCHEMA_PATH = context.asAbsolutePath(`schema`);
-	const EXEC_PATH = context.asAbsolutePath(`bin/ytt-lint-${process.platform}`);
+	const EXEC_PATH = context.asAbsolutePath(`bin/ytt-lint`);
 	
 	if (process.platform != "win32") {
 		child_process.exec(`chmod +x "${EXEC_PATH}"`)

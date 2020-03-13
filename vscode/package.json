@@ -14,15 +14,15 @@
 		"Linters"
 	],
 	"activationEvents": [
-		"onCommand:extension.helloWorld",
+		"onCommand:extension.pullSchemaK8S",
 		"onLanguage:yaml"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.helloWorld",
-				"title": "Hello World"
+				"command": "extension.pullSchemaK8S",
+				"title": "Pull crd schemas from Kubernetes cluster"
 			}
 		]
 	},

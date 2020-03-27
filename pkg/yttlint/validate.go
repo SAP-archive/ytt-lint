@@ -25,6 +25,7 @@ import (
 )
 
 type myTemplateLoader struct {
+	*workspace.TemplateLoader
 	compiledTemplate *template.CompiledTemplate
 	name             string
 	api              yttlibrary.API
@@ -56,7 +57,7 @@ func (l myTemplateLoader) Load(
 		}
 	}
 
-	return nil, fmt.Errorf(`load("%s", ...) is not supported by ytt-lint`, module)
+	return l.TemplateLoader.Load(thread, module)
 }
 
 func (l myTemplateLoader) LoadData(
@@ -219,14 +220,21 @@ func (l *Linter) lint(data, filename string) []LinterError {
 
 	//fmt.Printf("### template:\n%s\n", compiledTemplate.DebugCodeAsString())
 	loader := myTemplateLoader{compiledTemplate: compiledTemplate, name: filename}
-	loader.api = newAPI(filename, compiledTemplate.TplReplaceNode, loader)
+	loader.TemplateLoader = workspace.NewTemplateLoader(&yamlmeta.Document{}, core.NewPlainUI(false), workspace.TemplateLoaderOpts{
+		IgnoreUnknownComments: true,
+	}, nil)
+	var rootLib *workspace.Library
+	loader.api, rootLib = newAPIandLib(filename, compiledTemplate.TplReplaceNode, loader)
 	thread := &starlark.Thread{Name: "test", Load: loader.Load}
+
+	thread.SetLocal("ytt.curr_library_key", rootLib)
+	thread.SetLocal("ytt.root_library_key", rootLib)
 
 	_, newVal, err := compiledTemplate.Eval(thread, loader)
 	if err != nil {
 		multiErr, ok := err.(template.CompiledTemplateMultiError)
 		if ok {
-			return mapMultierrorToLinterror(multiErr)
+			return mapMultierrorToLinterror(multiErr, filename)
 		}
 		fmt.Printf("Eval: %s\n", err.Error())
 		os.Exit(1)
@@ -595,7 +603,7 @@ func appendLocationIfKnownf(object interface{}, format string, a ...interface{})
 	return lintError
 }
 
-func newAPI(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader template.CompiledTemplateLoader) yttlibrary.API {
+func newAPIandLib(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader template.CompiledTemplateLoader) (yttlibrary.API, *workspace.Library) {
 	libraryExecutionFactory := workspace.NewLibraryExecutionFactory(core.NewPlainUI(false), workspace.TemplateLoaderOpts{
 		IgnoreUnknownComments: true,
 	})
@@ -607,12 +615,13 @@ func newAPI(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader templa
 		os.Exit(1)
 	}
 	rootLib := workspace.NewRootLibrary(inputFiles)
-	libraryModule := workspace.NewLibraryModule(workspace.LibraryExecutionContext{
+	library := workspace.NewLibraryModule(workspace.LibraryExecutionContext{
 		Current: rootLib,
 		Root:    rootLib,
-	}, libraryExecutionFactory).AsModule()
+	}, libraryExecutionFactory)
+	libraryModule := library.AsModule()
 
 	api := yttlibrary.NewAPI(replaceNodeFunc, &yamlmeta.Document{}, loader, libraryModule)
 
-	return api
+	return api, rootLib
 }

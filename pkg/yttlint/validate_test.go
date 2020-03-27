@@ -49,9 +49,9 @@ func TestValidate(t *testing.T) {
 		}},
 		pedanticErrors: []LinterError{},
 	}, {
-		filename: "../../examples/lint/unsupported-load.yaml",
+		filename: "../../examples/lint/load-not-found.yaml",
 		nonPedanticErrors: []LinterError{{
-			Msg: "cannot load something-else: load(\"something-else\", ...) is not supported by ytt-lint",
+			Msg: "cannot load file-not-found.yaml: Expected to find file file-not-found.yaml",
 			Pos: "test:2",
 		}},
 		pedanticErrors: []LinterError{},

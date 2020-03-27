@@ -7,7 +7,7 @@ import (
 	"github.com/k14s/ytt/pkg/template"
 )
 
-func mapMultierrorToLinterror(multiErr template.CompiledTemplateMultiError) []LinterError {
+func mapMultierrorToLinterror(multiErr template.CompiledTemplateMultiError, rootFile string) []LinterError {
 	errors := make([]LinterError, 0)
 	errs := reflect.ValueOf(multiErr).FieldByName("errs")
 	n := errs.Len()
@@ -33,6 +33,12 @@ func mapMultierrorToLinterror(multiErr template.CompiledTemplateMultiError) []Li
 			errors = append(errors, LinterError{
 				Msg: msg,
 				Pos: fmt.Sprintf("%s:%d", pos.FieldByName("file").String(), pos.FieldByName("line").Elem().Int()),
+			})
+		}
+		if m == 0 {
+			errors = append(errors, LinterError{
+				Msg: msg,
+				Pos: fmt.Sprintf("%s:%d", rootFile, 1),
 			})
 		}
 	}

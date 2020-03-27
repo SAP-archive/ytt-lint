@@ -1,6 +1,0 @@
-#@ load("@ytt:data", "data")
-#@ load("something-else", "assert")
-
-test:
-  a: #@ data.values.a
-  b: "b"

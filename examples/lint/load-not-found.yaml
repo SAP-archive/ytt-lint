@@ -1,0 +1,6 @@
+#@ load("@ytt:data", "data")
+#@ load("file-not-found.yaml", "something")
+
+test:
+  a: #@ something()
+  b: "b"

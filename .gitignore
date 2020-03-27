@@ -5,3 +5,6 @@
 
 /schema/
 /out/
+
+__pycache__/
+.mypy_cache/

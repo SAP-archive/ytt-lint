@@ -22,7 +22,7 @@
 		"commands": [
 			{
 				"command": "extension.pullSchemaK8S",
-				"title": "Pull crd schemas from Kubernetes cluster"
+				"title": "ytt-lint: Pull crd schemas from Kubernetes cluster"
 			}
 		]
 	},

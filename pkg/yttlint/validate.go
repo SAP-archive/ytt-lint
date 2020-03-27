@@ -541,7 +541,7 @@ func (l *Linter) isSubset(subSchema, schema map[string]interface{}, path string)
 			} else {
 				if subSchema["type"] == "magic" {
 					magic := subSchema["magic"].(*magic.MagicType)
-					if !(magic.CouldBeString && !magic.CouldBeInt && !magic.CouldBeFloat) {
+					if l.Pedantic && !(magic.CouldBeString && !magic.CouldBeInt && !magic.CouldBeFloat) {
 						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected string got a computed value. Tip: use str(...) to convert to string`, path))
 					}
 				} else {

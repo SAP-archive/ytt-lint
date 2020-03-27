@@ -10,7 +10,9 @@ import (
 	"strings"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	apiextensionsv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclientset "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -32,47 +34,101 @@ func Pull() error {
 
 	crds, err := crdClientset.ApiextensionsV1().CustomResourceDefinitions().List(metav1.ListOptions{})
 	if err != nil {
-		return fmt.Errorf("crdClientset.ApiextensionsV1().CustomResourceDefinitions().List(): %w", err)
-	}
+		if !k8serrors.IsNotFound(err) {
+			return fmt.Errorf("crdClientset.ApiextensionsV1().CustomResourceDefinitions().List(): %w", err)
+		}
+		fmt.Println("Error for ApiextensionsV1. Falling back to ApiextensionsV1beta1.")
+		crds, err := crdClientset.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{})
+		if err != nil {
+			return fmt.Errorf("crdClientset.ApiextensionsV1().CustomResourceDefinitions().List(): %w", err)
+		}
 
-	metadataTemplate := apiextensionsv1.JSONSchemaProps{}
-	err = json.Unmarshal([]byte(metadataTemplateJSON), &metadataTemplate)
-	if err != nil {
-		return fmt.Errorf("json.Unmarshal([]byte(metadataTemplateJSON), &metadataTemplate): %w", err)
-	}
+		metadataTemplate := apiextensionsv1beta1.JSONSchemaProps{}
+		err = json.Unmarshal([]byte(metadataTemplateJSON), &metadataTemplate)
+		if err != nil {
+			return fmt.Errorf("json.Unmarshal([]byte(metadataTemplateJSON), &metadataTemplate): %w", err)
+		}
 
-	for _, crd := range crds.Items {
-		kind := crd.Spec.Names.Kind
-		group := crd.Spec.Group
+		for _, crd := range crds.Items {
+			kind := crd.Spec.Names.Kind
+			group := crd.Spec.Group
 
-		for _, version := range crd.Spec.Versions {
-			if version.Schema == nil || version.Schema.OpenAPIV3Schema == nil {
-				fmt.Printf("%s version %s of group %s does not contain a schema and will be skipped.\n", kind, version.Name, group)
-				continue
+			for _, version := range crd.Spec.Versions {
+				var schema *apiextensionsv1beta1.JSONSchemaProps
+				if version.Schema == nil || version.Schema.OpenAPIV3Schema == nil {
+					if crd.Spec.Validation == nil || crd.Spec.Validation.OpenAPIV3Schema == nil {
+						fmt.Printf("%s version %s of group %s does not contain a schema and will be skipped.\n", kind, version.Name, group)
+						continue
+					}
+					schema = crd.Spec.Validation.OpenAPIV3Schema
+				} else {
+					schema = version.Schema.OpenAPIV3Schema
+				}
+				dirname := path.Join(schemaDir, group, version.Name)
+				filename := path.Join(dirname, strings.ToLower(kind)+".json")
+
+				schema.Properties["metadata"] = metadataTemplate
+
+				err = os.MkdirAll(dirname, os.ModePerm)
+				if err != nil {
+					return fmt.Errorf("os.MkdirAll: %w", err)
+				}
+
+				data, err := json.Marshal(schema)
+				if err != nil {
+					return fmt.Errorf("json.Marshal(schema): %w", err)
+				}
+
+				fmt.Printf("Writing schema for %s version %s of group %s to %s\n", kind, version.Name, group, filename)
+				err = ioutil.WriteFile(filename, data, os.ModePerm)
+				if err != nil {
+					return fmt.Errorf("ioutil.WriteFile: %w", err)
+				}
 			}
-			schema := version.Schema.OpenAPIV3Schema
-			dirname := path.Join(schemaDir, group, version.Name)
-			filename := path.Join(dirname, strings.ToLower(kind)+".json")
+		}
 
-			schema.Properties["metadata"] = metadataTemplate
+	} else {
+		metadataTemplate := apiextensionsv1.JSONSchemaProps{}
+		err = json.Unmarshal([]byte(metadataTemplateJSON), &metadataTemplate)
+		if err != nil {
+			return fmt.Errorf("json.Unmarshal([]byte(metadataTemplateJSON), &metadataTemplate): %w", err)
+		}
 
-			err = os.MkdirAll(dirname, os.ModePerm)
-			if err != nil {
-				return fmt.Errorf("os.MkdirAll: %w", err)
-			}
+		for _, crd := range crds.Items {
+			kind := crd.Spec.Names.Kind
+			group := crd.Spec.Group
 
-			data, err := json.Marshal(schema)
-			if err != nil {
-				return fmt.Errorf("json.Marshal(schema): %w", err)
-			}
+			for _, version := range crd.Spec.Versions {
+				var schema *apiextensionsv1.JSONSchemaProps
+				if version.Schema == nil || version.Schema.OpenAPIV3Schema == nil {
+					continue
+				} else {
+					schema = version.Schema.OpenAPIV3Schema
+				}
+				dirname := path.Join(schemaDir, group, version.Name)
+				filename := path.Join(dirname, strings.ToLower(kind)+".json")
 
-			fmt.Printf("Writing schema for %s version %s of group %s to %s\n", kind, version.Name, group, filename)
-			err = ioutil.WriteFile(filename, data, os.ModePerm)
-			if err != nil {
-				return fmt.Errorf("ioutil.WriteFile: %w", err)
+				schema.Properties["metadata"] = metadataTemplate
+
+				err = os.MkdirAll(dirname, os.ModePerm)
+				if err != nil {
+					return fmt.Errorf("os.MkdirAll: %w", err)
+				}
+
+				data, err := json.Marshal(schema)
+				if err != nil {
+					return fmt.Errorf("json.Marshal(schema): %w", err)
+				}
+
+				fmt.Printf("Writing schema for %s version %s of group %s to %s\n", kind, version.Name, group, filename)
+				err = ioutil.WriteFile(filename, data, os.ModePerm)
+				if err != nil {
+					return fmt.Errorf("ioutil.WriteFile: %w", err)
+				}
 			}
 		}
 	}
+
 	return nil
 }
 

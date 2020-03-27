@@ -18,27 +18,27 @@ import (
 func Pull() error {
 	usr, err := user.Current()
 	if err != nil {
-		return err
+		return fmt.Errorf("user.Current(): %w", err)
 	}
 	schemaDir := path.Join(usr.HomeDir, ".ytt-lint", "schema", "k8s")
 
 	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(clientcmd.NewDefaultClientConfigLoadingRules(), &clientcmd.ConfigOverrides{})
 	config, err := kubeConfig.ClientConfig()
 	if err != nil {
-		return err
+		return fmt.Errorf("kubeConfig.ClientConfig(): %w", err)
 	}
 
 	crdClientset, err := apiextensionsclientset.NewForConfig(config)
 
 	crds, err := crdClientset.ApiextensionsV1().CustomResourceDefinitions().List(metav1.ListOptions{})
 	if err != nil {
-		return err
+		return fmt.Errorf("crdClientset.ApiextensionsV1().CustomResourceDefinitions().List(): %w", err)
 	}
 
 	metadataTemplate := apiextensionsv1.JSONSchemaProps{}
 	err = json.Unmarshal([]byte(metadataTemplateJSON), &metadataTemplate)
 	if err != nil {
-		return err
+		return fmt.Errorf("json.Unmarshal([]byte(metadataTemplateJSON), &metadataTemplate): %w", err)
 	}
 
 	for _, crd := range crds.Items {
@@ -58,18 +58,18 @@ func Pull() error {
 
 			err = os.MkdirAll(dirname, os.ModePerm)
 			if err != nil {
-				return err
+				return fmt.Errorf("os.MkdirAll: %w", err)
 			}
 
 			data, err := json.Marshal(schema)
 			if err != nil {
-				return err
+				return fmt.Errorf("json.Marshal(schema): %w", err)
 			}
 
 			fmt.Printf("Writing schema for %s version %s of group %s to %s\n", kind, version.Name, group, filename)
 			err = ioutil.WriteFile(filename, data, os.ModePerm)
 			if err != nil {
-				return err
+				return fmt.Errorf("ioutil.WriteFile: %w", err)
 			}
 		}
 	}

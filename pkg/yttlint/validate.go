@@ -284,7 +284,7 @@ func (l *Linter) lint(data, filename string) []LinterError {
 			subSchema.Description = doc.Position.AsString()
 		}
 
-		subErrors := l.isSubset(subSchema, schema, "")
+		subErrors := l.isSubset(schema.Definitions, subSchema, schema, "")
 		errors = append(errors, subErrors...)
 	}
 
@@ -485,15 +485,23 @@ func convert(value interface{}) *v1.JSONSchemaProps {
 
 }
 
-func (l *Linter) isSubset(subSchema, schema *v1.JSONSchemaProps, path string) []LinterError {
+func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.JSONSchemaProps, path string) []LinterError {
 	errors := make([]LinterError, 0)
 
 	if len(subSchema.AnyOf) > 0 {
 		for _, item := range subSchema.AnyOf {
-			subErrors := l.isSubset(&item, schema, path)
+			subErrors := l.isSubset(defs, &item, schema, path)
 			errors = append(errors, subErrors...)
 		}
 		return errors
+	}
+
+	if schema.Ref != nil {
+		ref := *schema.Ref
+		if strings.HasPrefix(ref, "#/definitions/") {
+			deref := defs[ref[14:]]
+			return l.isSubset(defs, subSchema, &deref, path)
+		}
 	}
 
 	switch schema.Type {
@@ -503,12 +511,12 @@ func (l *Linter) isSubset(subSchema, schema *v1.JSONSchemaProps, path string) []
 			if !ok {
 				subPropT, okT := subSchema.Properties["__ytt_lint_t_"+key]
 				if okT {
-					subErrors := l.isSubset(&subPropT, &prop, fmt.Sprintf("%s.%s", path, key))
+					subErrors := l.isSubset(defs, &subPropT, &prop, fmt.Sprintf("%s.%s", path, key))
 					errors = append(errors, subErrors...)
 				}
 				subPropF, okF := subSchema.Properties["__ytt_lint_f_"+key]
 				if okF {
-					subErrors := l.isSubset(&subPropF, &prop, fmt.Sprintf("%s.%s", path, key))
+					subErrors := l.isSubset(defs, &subPropF, &prop, fmt.Sprintf("%s.%s", path, key))
 					errors = append(errors, subErrors...)
 				}
 
@@ -521,7 +529,7 @@ func (l *Linter) isSubset(subSchema, schema *v1.JSONSchemaProps, path string) []
 					}
 				}
 			} else {
-				subErrors := l.isSubset(&subProp, &prop, fmt.Sprintf("%s.%s", path, key))
+				subErrors := l.isSubset(defs, &subProp, &prop, fmt.Sprintf("%s.%s", path, key))
 				errors = append(errors, subErrors...)
 			}
 		}
@@ -537,7 +545,7 @@ func (l *Linter) isSubset(subSchema, schema *v1.JSONSchemaProps, path string) []
 				_, ok := schema.Properties[key]
 				if !ok {
 					if additionalPropertiesSchema != nil {
-						subErrors := l.isSubset(&val, additionalPropertiesSchema, fmt.Sprintf("%s.%s", path, key))
+						subErrors := l.isSubset(defs, &val, additionalPropertiesSchema, fmt.Sprintf("%s.%s", path, key))
 						errors = append(errors, subErrors...)
 					} else {
 						errors = append(errors, appendLocationIfKnownf(&val, "%s.%s additional properties are not permitted", path, key))
@@ -549,7 +557,7 @@ func (l *Linter) isSubset(subSchema, schema *v1.JSONSchemaProps, path string) []
 	case "array":
 		itemsSchema := schema.Items.Schema
 		for i, item := range subSchema.Items.JSONSchemas {
-			subErrors := l.isSubset(&item, itemsSchema, fmt.Sprintf("%s[%d]", path, i))
+			subErrors := l.isSubset(defs, &item, itemsSchema, fmt.Sprintf("%s[%d]", path, i))
 			errors = append(errors, subErrors...)
 		}
 

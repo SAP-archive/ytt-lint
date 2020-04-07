@@ -510,22 +510,25 @@ func (l *Linter) isSubset(subSchema, schema map[string]interface{}, path string)
 					}
 				}
 
-				additionalProperties, code := getAndCast(schema, "additionalProperties")
+				additionalPropertiesAllowAll := false
+				additionalPropertiesSchema, code := getAndCast(schema, "additionalProperties")
 				if code == 2 {
-					errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast additionalProperties: %v", path, schema["additionalProperties"]))
-				} else if code == 1 {
-					for key, val := range subProps {
-						_, ok := properties[key]
-						if !ok {
-							errors = append(errors, appendLocationIfKnownf(val, "%s.%s additional properties are not permitted", path, key))
-						}
+					var ok bool
+					additionalPropertiesAllowAll, ok = schema["additionalProperties"].(bool)
+					if !ok {
+						errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast additionalProperties: %v", path, schema["additionalProperties"]))
 					}
-				} else {
+				}
+				if !additionalPropertiesAllowAll {
 					for key, val := range subProps {
 						_, ok := properties[key]
 						if !ok {
-							subErrors := l.isSubset(val.(map[string]interface{}), additionalProperties, fmt.Sprintf("%s.%s", path, key))
-							errors = append(errors, subErrors...)
+							if len(additionalPropertiesSchema) > 0 {
+								subErrors := l.isSubset(val.(map[string]interface{}), additionalPropertiesSchema, fmt.Sprintf("%s.%s", path, key))
+								errors = append(errors, subErrors...)
+							} else {
+								errors = append(errors, appendLocationIfKnownf(val, "%s.%s additional properties are not permitted", path, key))
+							}
 						}
 					}
 				}

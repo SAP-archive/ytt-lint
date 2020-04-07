@@ -68,6 +68,16 @@ func Pull() error {
 				filename := path.Join(dirname, strings.ToLower(kind)+".json")
 
 				schema.Properties["metadata"] = metadataTemplate
+				if _, ok := schema.Properties["kind"]; !ok {
+					schema.Properties["kind"] = apiextensionsv1beta1.JSONSchemaProps{
+						Type: "string",
+					}
+				}
+				if _, ok := schema.Properties["apiVersion"]; !ok {
+					schema.Properties["apiVersion"] = apiextensionsv1beta1.JSONSchemaProps{
+						Type: "string",
+					}
+				}
 
 				err = os.MkdirAll(dirname, os.ModePerm)
 				if err != nil {
@@ -109,6 +119,16 @@ func Pull() error {
 				filename := path.Join(dirname, strings.ToLower(kind)+".json")
 
 				schema.Properties["metadata"] = metadataTemplate
+				if _, ok := schema.Properties["kind"]; !ok {
+					schema.Properties["kind"] = apiextensionsv1.JSONSchemaProps{
+						Type: "string",
+					}
+				}
+				if _, ok := schema.Properties["apiVersion"]; !ok {
+					schema.Properties["apiVersion"] = apiextensionsv1.JSONSchemaProps{
+						Type: "string",
+					}
+				}
 
 				err = os.MkdirAll(dirname, os.ModePerm)
 				if err != nil {

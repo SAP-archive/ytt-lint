@@ -42,7 +42,7 @@ You can see that in the bottom right of the window.
 
 ytt-lint does not have schema information built-in for every Kubernetes artifact out there.
 
-If the problem occurs on a CR see (Working with CRDs)[#working-with-crds].
+If the problem occurs on a CR see [Working with CRDs](#working-with-crds).
 
 If you think the kind should be integrated into ytt-lint open an issue on the repo and we will discuss.
 
@@ -52,5 +52,5 @@ Open an issue on this repo. If possible include a ytt-template or plain-yaml-fil
 
 # Acknowledgments
 
-This project heavily depends on (ytt)[https://github.com/k14s/ytt], which itself is based on the (Starlark in Go)[https://github.com/google/starlark-go] project.
-Kudos also to the (Kubernetes project)[https://kubernetes.io/], which provide JSON Schemas for their resources, and (cappyzawa)[https://github.com/cappyzawa], who created a (JSON Schema for Concourse pipelines)[https://github.com/cappyzawa/concourse-pipeline-jsonschema].
+This project heavily depends on [ytt](https://github.com/k14s/ytt), which itself is based on the [Starlark in Go](https://github.com/google/starlark-go) project.
+Kudos also to the [Kubernetes project](https://kubernetes.io/), which provide JSON Schemas for their resources, and [cappyzawa](https://github.com/cappyzawa), who created a [JSON Schema for Concourse pipelines](https://github.com/cappyzawa/concourse-pipeline-jsonschema).

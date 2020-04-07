@@ -11,7 +11,7 @@ import (
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
-const schemaDir = `/git/ytt-lint/schema/`
+const schemaDir = `/git/ytt-lint/vscode/schema/`
 
 type kubernetesGVK struct {
 	group, version, kind string
@@ -19,10 +19,16 @@ type kubernetesGVK struct {
 
 var schemaCache map[string]*v1.JSONSchemaProps
 
-func loadSchema(gvk kubernetesGVK) (*v1.JSONSchemaProps, error) {
+func loadK8SSchema(gvk kubernetesGVK) (*v1.JSONSchemaProps, error) {
 	gvk.kind = strings.ToLower(gvk.kind)
-	key := path.Join(gvk.group, gvk.version, gvk.kind)
+	key := path.Join("k8s", gvk.group, gvk.version, gvk.kind)
+	return loadSchema(key)
+}
+func loadConcourseSchema() (*v1.JSONSchemaProps, error) {
+	return loadSchema(path.Join("builtin", "concourse_jsonschema2"))
+}
 
+func loadSchema(key string) (*v1.JSONSchemaProps, error) {
 	schema, ok := schemaCache[key]
 	if ok {
 		return schema, nil
@@ -40,7 +46,7 @@ func loadSchema(gvk kubernetesGVK) (*v1.JSONSchemaProps, error) {
 	result := &v1.JSONSchemaProps{}
 	found := false
 	for _, schemaPath := range schemaPaths {
-		schemaFileName := path.Join(schemaPath, "k8s", key+".json")
+		schemaFileName := path.Join(schemaPath, key+".json")
 		scheamFile, err := os.Open(schemaFileName)
 		if err != nil {
 			if os.IsNotExist(err) {
@@ -68,7 +74,7 @@ func loadSchema(gvk kubernetesGVK) (*v1.JSONSchemaProps, error) {
 	}
 
 	if !found {
-		return nil, fmt.Errorf("could not find schema file for %s/%s/%s in: %v", gvk.group, gvk.version, gvk.kind, schemaPaths)
+		return nil, fmt.Errorf("could not find schema file %s.json in: %v", key, schemaPaths)
 	}
 
 	if schemaCache == nil {

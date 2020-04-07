@@ -267,15 +267,23 @@ func (l *Linter) lint(data, filename string) []LinterError {
 
 	for _, doc := range newVal.(*yamlmeta.DocumentSet).Items {
 		gvk, item := extractKind(doc)
-		if gvk.kind == "" {
+		var err error
+		var schema *v1.JSONSchemaProps
+		if gvk.kind != "" {
+			schema, err = loadK8SSchema(gvk)
+			if err != nil {
+				errors = append(errors,
+					appendLocationIfKnownf(item, "Error loading schema for kind %s: %v\n", gvk.kind, err.Error()))
+				continue
+			}
+		} else if isConcoursePipeline(doc) {
+			schema, err = loadConcourseSchema()
+			if err != nil {
+				panic(err)
+			}
+		} else {
 			continue
 			// TODO: print warning if not a trivial document
-		}
-		schema, err := loadSchema(gvk)
-		if err != nil {
-			errors = append(errors,
-				appendLocationIfKnownf(item, "Error loading schema for kind %s: %v\n", gvk.kind, err.Error()))
-			continue
 		}
 
 		subSchema := convert(doc.Value)
@@ -289,6 +297,22 @@ func (l *Linter) lint(data, filename string) []LinterError {
 	}
 
 	return errors
+}
+
+func isConcoursePipeline(doc *yamlmeta.Document) bool {
+	m, ok := doc.Value.(*yamlmeta.Map)
+	if !ok {
+		return false
+	}
+
+	for _, item := range m.Items {
+		if item.Key == "jobs" {
+			_, isArray := item.Value.(*yamlmeta.Array)
+			return isArray
+		}
+	}
+
+	return false
 }
 
 func extractKind(doc *yamlmeta.Document) (kubernetesGVK, *yamlmeta.MapItem) {

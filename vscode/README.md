@@ -24,6 +24,21 @@ Everything
 
 ## Release Notes
 
-### 0.0.1
+### 0.0.4 - Concourse
 
-Draft
+- support linting concourse pipelines
+- improve "pull from k8s" to make sure extracted schemas contain `kind` and `apiVersion`
+
+### 0.0.3 - Custom Libraries
+
+- support 'load' of custom lib.yaml
+- improve schema extraction to include multiple k8s versions (now supporting Deployment v1 out of the box)
+- linting is now less pedantic about values used as strings.
+
+### 0.0.2 - MVP
+
+MVP release. IMHO it is already quite useful.
+
+### 0.0.1 - Internal
+
+Internal Only

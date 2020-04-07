@@ -392,6 +392,17 @@ func convert(value interface{}) map[string]interface{} {
 		}
 
 		return object
+	case []interface{}:
+		items := make([]interface{}, 0, len(v))
+		for _, item := range v {
+			convertedItem := convert(item)
+			items = append(items, convertedItem)
+		}
+		return map[string]interface{}{
+			"type":  "array",
+			"items": items,
+		}
+
 	case string:
 		return map[string]interface{}{
 			"type":  "string",
@@ -425,7 +436,7 @@ func convert(value interface{}) map[string]interface{} {
 
 	default:
 		return map[string]interface{}{
-			"error": fmt.Sprintf("unsupported type %T", value),
+			"error": fmt.Sprintf("convert(): unsupported type %T", value),
 		}
 	}
 

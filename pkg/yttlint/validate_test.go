@@ -55,6 +55,10 @@ func TestValidate(t *testing.T) {
 			Pos: "test:2",
 		}},
 		pedanticErrors: []LinterError{},
+	}, {
+		filename:          "../../examples/lint/array-parameter.yaml",
+		nonPedanticErrors: []LinterError{},
+		pedanticErrors:    []LinterError{},
 	}}
 
 	for _, testCase := range cases {

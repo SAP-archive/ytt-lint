@@ -1,0 +1,9 @@
+---
+#@ def generate(name,serial_groups):
+name: #@ name
+serial_groups: #@ serial_groups
+plan: []
+#@ end
+
+jobs:
+- #@ generate("create",["cluster"])

@@ -27,3 +27,7 @@ spec:
       - path: "/"
         backend:
           servicePort: 6
+          resource:
+            name: test
+
+

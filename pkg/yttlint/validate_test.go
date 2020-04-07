@@ -23,8 +23,8 @@ func TestValidate(t *testing.T) {
 			Msg: ".metadata.namespace expected string got: integer",
 			Pos: "test:11",
 		}, {
-			Msg: ".spec.rules[0].http.paths[1].backend missing required entry serviceName",
-			Pos: "test:28",
+			Msg: ".spec.rules[0].http.paths[1].backend.resource missing required entry kind",
+			Pos: "test:30",
 		}},
 		pedanticErrors: []LinterError{{
 			Msg: ".spec.rules[0].http.paths[0].backend.servicePort expected int-or-string got a computed value. Tip: use str(...) or int(...) to convert to int or string",

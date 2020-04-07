@@ -7,6 +7,8 @@ import (
 	"os"
 	"path"
 	"strings"
+
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
 const schemaDir = `/git/ytt-lint/schema/`
@@ -15,9 +17,9 @@ type kubernetesGVK struct {
 	group, version, kind string
 }
 
-var schemaCache map[string]map[string]interface{}
+var schemaCache map[string]*v1.JSONSchemaProps
 
-func loadSchema(gvk kubernetesGVK) (map[string]interface{}, error) {
+func loadSchema(gvk kubernetesGVK) (*v1.JSONSchemaProps, error) {
 	gvk.kind = strings.ToLower(gvk.kind)
 	key := path.Join(gvk.group, gvk.version, gvk.kind)
 
@@ -35,7 +37,7 @@ func loadSchema(gvk kubernetesGVK) (map[string]interface{}, error) {
 		schemaPaths = append(schemaPaths, path.Join(os.Getenv("HOME"), schemaDir))
 	}
 
-	var result map[string]interface{}
+	result := &v1.JSONSchemaProps{}
 	found := false
 	for _, schemaPath := range schemaPaths {
 		schemaFileName := path.Join(schemaPath, "k8s", key+".json")
@@ -70,7 +72,7 @@ func loadSchema(gvk kubernetesGVK) (map[string]interface{}, error) {
 	}
 
 	if schemaCache == nil {
-		schemaCache = make(map[string]map[string]interface{})
+		schemaCache = make(map[string]*v1.JSONSchemaProps)
 	}
 	schemaCache[key] = result
 	return result, nil

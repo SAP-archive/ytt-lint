@@ -11,7 +11,6 @@ import (
 	"strings"
 
 	"github.com/k14s/ytt/pkg/cmd/core"
-	"github.com/k14s/ytt/pkg/filepos"
 	"github.com/k14s/ytt/pkg/files"
 	"github.com/k14s/ytt/pkg/template"
 	tplcore "github.com/k14s/ytt/pkg/template/core"
@@ -22,6 +21,7 @@ import (
 	_ "github.com/phil9909/ytt-lint/pkg/librarywrapper" // inject into lib
 	"github.com/phil9909/ytt-lint/pkg/magic"
 	"go.starlark.net/starlark"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
 type myTemplateLoader struct {
@@ -279,9 +279,9 @@ func (l *Linter) lint(data, filename string) []LinterError {
 		}
 
 		subSchema := convert(doc.Value)
-		if _, ok := subSchema["source"]; !ok && doc.Position.IsKnown() {
+		if subSchema.Description == "" && doc.Position.IsKnown() {
 			doc.Position.SetFile(filename)
-			subSchema["source"] = doc.Position
+			subSchema.Description = doc.Position.AsString()
 		}
 
 		subErrors := l.isSubset(subSchema, schema, "")
@@ -338,10 +338,14 @@ func (p *schemaPrinter) Print(item *yamlmeta.Document) error {
 	return nil
 }
 
-func convert(value interface{}) map[string]interface{} {
+func convert(value interface{}) *v1.JSONSchemaProps {
 	switch v := value.(type) {
 	case *yamlmeta.Map:
-		properties := make(map[string]interface{})
+		object := v1.JSONSchemaProps{
+			Type:       "object",
+			Properties: map[string]v1.JSONSchemaProps{},
+		}
+
 		for _, item := range v.Items {
 			value := convert(item.Value)
 			key := item.Key.(string)
@@ -350,263 +354,269 @@ func convert(value interface{}) map[string]interface{} {
 				key = key[13:]
 			}
 
-			if _, ok := value["source"]; !ok && item.Position.IsKnown() {
-				value["source"] = item.Position
+			if value.Description == "" && item.Position.IsKnown() {
+				value.Description = item.Position.AsCompactString()
 			}
 
-			_, allreadExists := properties[key]
+			_, allreadExists := object.Properties[key]
 			if allreadExists {
-				oldValue := properties[key].(map[string]interface{})
-				anyOf, isAnyOf := oldValue["anyOf"]
-				if isAnyOf {
-					oldValue["anyOf"] = append(anyOf.([]interface{}), value)
+				oldValue := object.Properties[key]
+				if len(oldValue.AnyOf) > 0 {
+					oldValue.AnyOf = append(oldValue.AnyOf, *value)
 				} else {
-					value = map[string]interface{}{
-						"anyOf": []interface{}{oldValue, value},
+					value = &v1.JSONSchemaProps{
+						AnyOf: []v1.JSONSchemaProps{oldValue, *value},
 					}
 				}
 			}
 
-			properties[key] = value
-		}
-		object := map[string]interface{}{
-			"type":       "object",
-			"properties": properties,
+			object.Properties[key] = *value
 		}
 
-		return object
+		return &object
+
 	case *yamlmeta.Array:
-		items := make([]interface{}, 0, len(v.Items))
+		items := make([]v1.JSONSchemaProps, 0, len(v.Items))
 		for _, item := range v.Items {
 			convertedItem := convert(item.Value)
 
-			if _, ok := convertedItem["source"]; !ok && item.Position.IsKnown() {
-				convertedItem["source"] = item.Position
+			if convertedItem.Description == "" && item.Position.IsKnown() {
+				convertedItem.Description = item.Position.AsCompactString()
 			}
 
-			items = append(items, convertedItem)
-		}
-		object := map[string]interface{}{
-			"type":  "array",
-			"items": items,
+			items = append(items, *convertedItem)
 		}
 
-		return object
+		return &v1.JSONSchemaProps{
+			Type: "array",
+			Items: &v1.JSONSchemaPropsOrArray{
+				JSONSchemas: items,
+			},
+		}
+
 	case []interface{}:
-		items := make([]interface{}, 0, len(v))
+		items := make([]v1.JSONSchemaProps, 0, len(v))
 		for _, item := range v {
 			convertedItem := convert(item)
-			items = append(items, convertedItem)
+			items = append(items, *convertedItem)
 		}
-		return map[string]interface{}{
-			"type":  "array",
-			"items": items,
+		return &v1.JSONSchemaProps{
+			Type: "array",
+			Items: &v1.JSONSchemaPropsOrArray{
+				JSONSchemas: items,
+			},
 		}
 
 	case string:
-		return map[string]interface{}{
-			"type":  "string",
-			"const": v,
+		encoded, err := json.Marshal(v)
+		if err != nil {
+			panic(err)
+		}
+		return &v1.JSONSchemaProps{
+			Type: "string",
+			Default: &v1.JSON{
+				Raw: encoded,
+			},
 		}
 	case int:
-		return map[string]interface{}{
-			"type":  "integer",
-			"const": v,
+		encoded, err := json.Marshal(v)
+		if err != nil {
+			panic(err)
 		}
-	case int32:
-		return map[string]interface{}{
-			"type":  "integer",
-			"const": v,
+		return &v1.JSONSchemaProps{
+			Type: "integer",
+			Default: &v1.JSON{
+				Raw: encoded,
+			},
 		}
 	case int64:
-		return map[string]interface{}{
-			"type":  "integer",
-			"const": v,
+		encoded, err := json.Marshal(v)
+		if err != nil {
+			panic(err)
+		}
+		return &v1.JSONSchemaProps{
+			Type: "integer",
+			Default: &v1.JSON{
+				Raw: encoded,
+			},
+		}
+	case int32:
+		encoded, err := json.Marshal(v)
+		if err != nil {
+			panic(err)
+		}
+		return &v1.JSONSchemaProps{
+			Type: "integer",
+			Default: &v1.JSON{
+				Raw: encoded,
+			},
 		}
 	case bool:
-		return map[string]interface{}{
-			"type":  "boolean",
-			"const": v,
+		encoded, err := json.Marshal(v)
+		if err != nil {
+			panic(err)
+		}
+		return &v1.JSONSchemaProps{
+			Type: "boolean",
+			Default: &v1.JSON{
+				Raw: encoded,
+			},
 		}
 	case *magic.MagicType:
-		return map[string]interface{}{
-			"type":  "magic",
-			"magic": value,
-		} // anything could be here
+		encoded, err := json.Marshal(v)
+		if err != nil {
+			panic(err)
+		}
+		return &v1.JSONSchemaProps{
+			Type: "magic",
+			Default: &v1.JSON{
+				Raw: encoded,
+			},
+		}
 
 	default:
-		return map[string]interface{}{
-			"error": fmt.Sprintf("convert(): unsupported type %T", value),
+		return &v1.JSONSchemaProps{
+			Type: "error",
+			Default: &v1.JSON{
+				Raw: []byte(fmt.Sprintf("convert(): unsupported type %T", value)),
+			},
 		}
 	}
 
 }
 
-func getAndCast(in map[string]interface{}, key string) (map[string]interface{}, int) {
-	prop, ok := in[key]
-	if !ok {
-		return map[string]interface{}{}, 1
-	}
-	properties, ok := prop.(map[string]interface{})
-	if !ok {
-		return nil, 2
-	}
-
-	return properties, 0
-}
-
-func (l *Linter) isSubset(subSchema, schema map[string]interface{}, path string) []LinterError {
+func (l *Linter) isSubset(subSchema, schema *v1.JSONSchemaProps, path string) []LinterError {
 	errors := make([]LinterError, 0)
 
-	anyOf, isAnyOf := subSchema["anyOf"]
-	if isAnyOf {
-		for _, item := range anyOf.([]interface{}) {
-			subErrors := l.isSubset(item.(map[string]interface{}), schema, path)
+	if len(subSchema.AnyOf) > 0 {
+		for _, item := range subSchema.AnyOf {
+			subErrors := l.isSubset(&item, schema, path)
 			errors = append(errors, subErrors...)
 		}
 		return errors
 	}
 
-	switch schema["type"] {
+	switch schema.Type {
 	case "object":
-		properties, code := getAndCast(schema, "properties")
-		if code == 2 {
-			errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast properties: %v", path, schema["properties"]))
-		} else {
-			subProps, ok := subSchema["properties"].(map[string]interface{})
+		for key, prop := range schema.Properties {
+			subProp, ok := subSchema.Properties[key]
 			if !ok {
-				errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast subschema properties: %v", path, subSchema["properties"]))
+				subPropT, okT := subSchema.Properties["__ytt_lint_t_"+key]
+				if okT {
+					subErrors := l.isSubset(&subPropT, &prop, fmt.Sprintf("%s.%s", path, key))
+					errors = append(errors, subErrors...)
+				}
+				subPropF, okF := subSchema.Properties["__ytt_lint_f_"+key]
+				if okF {
+					subErrors := l.isSubset(&subPropF, &prop, fmt.Sprintf("%s.%s", path, key))
+					errors = append(errors, subErrors...)
+				}
+
+				if !okF || !okT {
+					for _, requiredKey := range schema.Required {
+						if requiredKey == key {
+							errors = append(errors, appendLocationIfKnownf(subSchema, "%s missing required entry %s", path, key))
+							//break
+						}
+					}
+				}
 			} else {
-				for key, prop := range properties {
-					subProp := subProps[key]
-					if subProp == nil {
-						subPropT := subProps["__ytt_lint_t_"+key]
-						if subPropT != nil {
-							subErrors := l.isSubset(subPropT.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
-							errors = append(errors, subErrors...)
-						}
-						subPropF := subProps["__ytt_lint_f_"+key]
-						if subPropF != nil {
-							subErrors := l.isSubset(subPropF.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
-							errors = append(errors, subErrors...)
-						}
+				subErrors := l.isSubset(&subProp, &prop, fmt.Sprintf("%s.%s", path, key))
+				errors = append(errors, subErrors...)
+			}
+		}
 
-						if subPropF == nil || subPropT == nil {
-							r, ok := schema["required"]
-							if ok {
-								required := r.([]interface{})
-								for _, requiredKey := range required {
-									if requiredKey == key {
-										errors = append(errors, appendLocationIfKnownf(subSchema, "%s missing required entry %s", path, key))
-									}
-								}
-							}
-						}
-						//fmt.Printf("subProp(%v) == nil\n", key)
-						// TODO: check required
-					} else {
-						subErrors := l.isSubset(subProp.(map[string]interface{}), prop.(map[string]interface{}), fmt.Sprintf("%s.%s", path, key))
+		var additionalPropertiesSchema *v1.JSONSchemaProps
+		additionalPropertiesAllowAll := false
+		if schema.AdditionalProperties != nil {
+			additionalPropertiesSchema = schema.AdditionalProperties.Schema
+			additionalPropertiesAllowAll = schema.AdditionalProperties.Allows && (additionalPropertiesSchema == nil)
+		}
+		if !additionalPropertiesAllowAll {
+			for key, val := range subSchema.Properties {
+				_, ok := schema.Properties[key]
+				if !ok {
+					if additionalPropertiesSchema != nil {
+						subErrors := l.isSubset(&val, additionalPropertiesSchema, fmt.Sprintf("%s.%s", path, key))
 						errors = append(errors, subErrors...)
-					}
-				}
-
-				additionalPropertiesAllowAll := false
-				additionalPropertiesSchema, code := getAndCast(schema, "additionalProperties")
-				if code == 2 {
-					var ok bool
-					additionalPropertiesAllowAll, ok = schema["additionalProperties"].(bool)
-					if !ok {
-						errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast additionalProperties: %v", path, schema["additionalProperties"]))
-					}
-				}
-				if !additionalPropertiesAllowAll {
-					for key, val := range subProps {
-						_, ok := properties[key]
-						if !ok {
-							if len(additionalPropertiesSchema) > 0 {
-								subErrors := l.isSubset(val.(map[string]interface{}), additionalPropertiesSchema, fmt.Sprintf("%s.%s", path, key))
-								errors = append(errors, subErrors...)
-							} else {
-								errors = append(errors, appendLocationIfKnownf(val, "%s.%s additional properties are not permitted", path, key))
-							}
-						}
+					} else {
+						errors = append(errors, appendLocationIfKnownf(&val, "%s.%s additional properties are not permitted", path, key))
 					}
 				}
 			}
 		}
 
 	case "array":
-		itemsSchema := schema["items"].(map[string]interface{})
-		subItems, ok := subSchema["items"].([]interface{})
-		if !ok {
-			errors = append(errors, appendLocationIfKnownf(subSchema, "%s can't cast subSchema items: %v", path, subSchema["items"]))
-		} else {
-			for i, item := range subItems {
-				//fmt.Println(item)
-				subErrors := l.isSubset(item.(map[string]interface{}), itemsSchema, fmt.Sprintf("%s[%d]", path, i))
-				errors = append(errors, subErrors...)
-			}
+		itemsSchema := schema.Items.Schema
+		for i, item := range subSchema.Items.JSONSchemas {
+			subErrors := l.isSubset(&item, itemsSchema, fmt.Sprintf("%s[%d]", path, i))
+			errors = append(errors, subErrors...)
 		}
-	case "string":
-		if subSchema["type"] != "string" {
-			format, hasFormat := schema["format"]
 
-			if hasFormat && format == "int-or-string" {
-				if subSchema["type"] == "magic" {
-					magic := subSchema["magic"].(*magic.MagicType)
+	case "string":
+		if subSchema.Type != "string" {
+			format := schema.Format
+
+			if format == "int-or-string" {
+				if subSchema.Type == "magic" {
+					magic := extractMagicTypeFromSchema(subSchema)
 					if l.Pedantic && !((magic.CouldBeString || magic.CouldBeInt) && !magic.CouldBeFloat) {
 						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected int-or-string got a computed value. Tip: use str(...) or int(...) to convert to int or string`, path))
 					}
-				} else if subSchema["type"] != "integer" {
-					errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected int-or-string got: %s", path, subSchema["type"]))
+				} else if subSchema.Type != "integer" {
+					errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected int-or-string got: %s", path, subSchema.Type))
 				}
 			} else {
-				if subSchema["type"] == "magic" {
-					magic := subSchema["magic"].(*magic.MagicType)
+				if subSchema.Type == "magic" {
+					magic := extractMagicTypeFromSchema(subSchema)
 					if l.Pedantic && !(magic.CouldBeString && !magic.CouldBeInt && !magic.CouldBeFloat) {
 						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected string got a computed value. Tip: use str(...) to convert to string`, path))
 					}
 				} else {
-					errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema["type"]))
+					errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema.Type))
 				}
 			}
 
 		}
 	case "integer":
-		if subSchema["type"] != "integer" {
-			if subSchema["type"] == "magic" {
-				magic := subSchema["magic"].(*magic.MagicType)
+		if subSchema.Type != "integer" {
+			if subSchema.Type == "magic" {
+				magic := extractMagicTypeFromSchema(subSchema)
 				if l.Pedantic && !(magic.CouldBeInt && !magic.CouldBeString && !magic.CouldBeFloat) {
 					errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected integer got a computed value. Tip: use int(...) to convert to int`, path))
 				}
 			} else {
-				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected integer got: %s", path, subSchema["type"]))
+				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected integer got: %s", path, subSchema.Type))
 			}
 		}
 	case "boolean":
-		if subSchema["type"] != "boolean" {
-			errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected boolean got: %s", path, subSchema["type"]))
+		if subSchema.Type != "boolean" {
+			errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected boolean got: %s", path, subSchema.Type))
 		}
 
 	default:
-		errors = append(errors, appendLocationIfKnownf(subSchema, " unsupported type %s", schema["type"]))
+		errors = append(errors, appendLocationIfKnownf(subSchema, " unsupported type %s", schema.Type))
 	}
 
 	return errors
 }
 
+func extractMagicTypeFromSchema(schema *v1.JSONSchemaProps) *magic.MagicType {
+	magic := &magic.MagicType{}
+	err := json.Unmarshal(schema.Default.Raw, magic)
+	if err != nil {
+		panic(err)
+	}
+	return magic
+}
+
 func appendLocationIfKnownf(object interface{}, format string, a ...interface{}) LinterError {
-
 	lintError := lintErrorf(format, a...)
-
-	m, ok := object.(map[string]interface{})
 	lintError.Pos = ""
 
+	jsonP, ok := object.(*v1.JSONSchemaProps)
 	if ok {
-		if source, ok := m["source"]; ok && source.(*filepos.Position).IsKnown() {
-			pos := source.(*filepos.Position)
-			lintError.Pos = pos.AsCompactString()
-		}
+		lintError.Pos = jsonP.Description
 	}
 
 	mi, ok := object.(*yamlmeta.MapItem)

@@ -59,6 +59,13 @@ func TestValidate(t *testing.T) {
 		filename:          "../../examples/lint/array-parameter.yaml",
 		nonPedanticErrors: []LinterError{},
 		pedanticErrors:    []LinterError{},
+	}, {
+		filename: "../../examples/lint/empty-pod.yaml",
+		nonPedanticErrors: []LinterError{{
+			Msg: ".spec.containers expected array got: null",
+			Pos: "test:6",
+		}},
+		pedanticErrors: []LinterError{},
 	}}
 
 	for _, testCase := range cases {

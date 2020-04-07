@@ -497,6 +497,10 @@ func convert(value interface{}) *v1.JSONSchemaProps {
 				Raw: encoded,
 			},
 		}
+	case nil:
+		return &v1.JSONSchemaProps{
+			Type: "null",
+		}
 
 	default:
 		return &v1.JSONSchemaProps{
@@ -579,10 +583,14 @@ func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.J
 		}
 
 	case "array":
-		itemsSchema := schema.Items.Schema
-		for i, item := range subSchema.Items.JSONSchemas {
-			subErrors := l.isSubset(defs, &item, itemsSchema, fmt.Sprintf("%s[%d]", path, i))
-			errors = append(errors, subErrors...)
+		if subSchema.Type != "array" {
+			errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected array got: %s", path, subSchema.Type))
+		} else {
+			itemsSchema := schema.Items.Schema
+			for i, item := range subSchema.Items.JSONSchemas {
+				subErrors := l.isSubset(defs, &item, itemsSchema, fmt.Sprintf("%s[%d]", path, i))
+				errors = append(errors, subErrors...)
+			}
 		}
 
 	case "string":

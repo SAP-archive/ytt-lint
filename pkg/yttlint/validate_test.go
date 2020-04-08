@@ -51,7 +51,8 @@ func TestValidate(t *testing.T) {
 	}, {
 		filename: "../../examples/lint/load-not-found.yaml",
 		nonPedanticErrors: []LinterError{{
-			Msg: "cannot load file-not-found.yaml: Expected to find file file-not-found.yaml",
+			// TODO: might remove the hint as it will confuse extension users.
+			Msg: "cannot load file-not-found.yaml: Expected to find file 'file-not-found.yaml' (hint: only files included via -f flag are available)",
 			Pos: "test:2",
 		}},
 		pedanticErrors: []LinterError{},

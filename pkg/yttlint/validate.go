@@ -60,6 +60,14 @@ func (l myTemplateLoader) Load(
 	return l.TemplateLoader.Load(thread, module)
 }
 
+func (l myTemplateLoader) FilePaths() []string {
+	return nil
+}
+
+func (l myTemplateLoader) FileData(string) ([]byte, error) {
+	return nil, fmt.Errorf("FileData is not supported")
+}
+
 func (l myTemplateLoader) LoadData(
 	thread *starlark.Thread, f *starlark.Builtin,
 	args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
@@ -667,7 +675,7 @@ func appendLocationIfKnownf(object interface{}, format string, a ...interface{})
 	return lintError
 }
 
-func newAPIandLib(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader template.CompiledTemplateLoader) (yttlibrary.API, *workspace.Library) {
+func newAPIandLib(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader yttlibrary.DataLoader) (yttlibrary.API, *workspace.Library) {
 	libraryExecutionFactory := workspace.NewLibraryExecutionFactory(core.NewPlainUI(false), workspace.TemplateLoaderOpts{
 		IgnoreUnknownComments: true,
 	})
@@ -685,7 +693,7 @@ func newAPIandLib(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader 
 	}, libraryExecutionFactory)
 	libraryModule := library.AsModule()
 
-	api := yttlibrary.NewAPI(replaceNodeFunc, &yamlmeta.Document{}, loader, libraryModule)
+	api := yttlibrary.NewAPI(replaceNodeFunc, yttlibrary.NewDataModule(&yamlmeta.Document{}, loader), libraryModule)
 
 	return api, rootLib
 }

@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/imdario/mergo v0.3.8 // indirect
-	github.com/k14s/ytt v0.26.0
+	github.com/k14s/ytt v0.27.0
 	github.com/onsi/gomega v1.9.0
 	go.starlark.net v0.0.0-20190219202100-4eb76950c5f0
 	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
@@ -16,4 +16,4 @@ require (
 	k8s.io/utils v0.0.0-20200229041039-0a110f9eb7ab // indirect
 )
 
-replace go.starlark.net => github.com/k14s/starlark-go v0.0.0-20200207164905-fd8842955e4e // ytt branch
+replace go.starlark.net => github.com/k14s/starlark-go v0.0.0-20200402152745-409c85f3828d // ytt branch

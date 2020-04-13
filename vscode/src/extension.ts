@@ -92,7 +92,9 @@ export function activate(context: vscode.ExtensionContext) {
 				let range = new vscode.Range(lineNum, start, lineNum, end);
 				let diagnostics = diagnosticMap.get(canonicalFile);
 				if (!diagnostics) { diagnostics = []; }
-				diagnostics.push(new vscode.Diagnostic(range, error.msg /*TODO: , error.severity*/));
+				let diag = new vscode.Diagnostic(range, error.msg /*TODO: , error.severity*/);
+				diag.source = "ytt-lint";
+				diagnostics.push(diag);
 				diagnosticMap.set(canonicalFile, diagnostics);
 			});
 			diagnosticMap.forEach((diags, file) => {

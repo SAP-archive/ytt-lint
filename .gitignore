@@ -3,6 +3,7 @@
 /ytt-*
 *main
 
+/cache/
 /schema/
 /out/
 

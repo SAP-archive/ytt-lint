@@ -25,7 +25,7 @@ func loadK8SSchema(gvk kubernetesGVK) (*v1.JSONSchemaProps, error) {
 	return loadSchema(key)
 }
 func loadConcourseSchema() (*v1.JSONSchemaProps, error) {
-	return loadSchema(path.Join("builtin", "concourse_jsonschema2"))
+	return loadSchema(path.Join("builtin", "concourse"))
 }
 
 func loadSchema(key string) (*v1.JSONSchemaProps, error) {

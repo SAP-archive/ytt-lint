@@ -5,7 +5,7 @@ import urllib.request
 
 
 in_name  =  "https://raw.githubusercontent.com/cappyzawa/concourse-pipeline-jsonschema/master/concourse_jsonschema.json"
-out_name = "vscode/schema/builtin/concourse_jsonschema2.json"
+out_name = "vscode/schema/builtin/concourse.json"
 
 def adapt(data):
     if isinstance(data, dict):

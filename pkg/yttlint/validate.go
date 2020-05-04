@@ -620,7 +620,7 @@ func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.J
 					if l.Pedantic && !(magic.CouldBeString && !magic.CouldBeInt && !magic.CouldBeFloat) {
 						errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected string got a computed value. Tip: use str(...) to convert to string`, path))
 					}
-				} else {
+				} else if path != ".metadata.creationTimestamp" { // https://github.com/kubernetes-sigs/controller-tools/issues/402
 					errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema.Type))
 				}
 			}

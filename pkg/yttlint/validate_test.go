@@ -61,6 +61,10 @@ func TestValidate(t *testing.T) {
 		nonPedanticErrors: []LinterError{},
 		pedanticErrors:    []LinterError{},
 	}, {
+		filename:          "../../examples/lint/kubebuilder.yaml",
+		nonPedanticErrors: []LinterError{},
+		pedanticErrors:    []LinterError{},
+	}, {
 		filename: "../../examples/lint/empty-pod.yaml",
 		nonPedanticErrors: []LinterError{{
 			Msg: ".spec.containers expected array got: null",

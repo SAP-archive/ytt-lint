@@ -60,12 +60,12 @@ func (l myTemplateLoader) Load(
 	return l.TemplateLoader.Load(thread, module)
 }
 
-func (l myTemplateLoader) FilePaths() []string {
-	return nil
+func (l myTemplateLoader) FilePaths(string) ([]string, error) {
+	return nil, fmt.Errorf("Unexpected call to FilePaths") // this should be handled by the injected magic-data-type
 }
 
 func (l myTemplateLoader) FileData(string) ([]byte, error) {
-	return nil, fmt.Errorf("FileData is not supported")
+	return nil, fmt.Errorf("Unexpected call to FileData") // this should be handled by the injected magic-data-type
 }
 
 func (l myTemplateLoader) LoadData(

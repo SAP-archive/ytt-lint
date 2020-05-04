@@ -171,8 +171,8 @@ github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1
 github.com/julienschmidt/httprouter v1.2.0/go.mod h1:SYymIcj16QtmaHHD7aYtjjsJG7VTCxuUUipMqKk8s4w=
 github.com/k14s/starlark-go v0.0.0-20200402152745-409c85f3828d h1:4M2Up49zRmP9vl02ngiOalNj2G5Fie+9K2nlx0rh1DU=
 github.com/k14s/starlark-go v0.0.0-20200402152745-409c85f3828d/go.mod h1:nmDLcffg48OtT/PSW0Hg7FvpRQsQh5OSqIylirxKC7o=
-github.com/k14s/ytt v0.27.0 h1:K7tWAizJ05r3PViO6i6JKHx+Xc7O+Aaw/WR6eN/Bc+s=
-github.com/k14s/ytt v0.27.0/go.mod h1:aqGLSpChNeJO+ozZwOYkSKb0gXSYynTO+k6aQ6g5U0A=
+github.com/k14s/ytt v0.27.1 h1:a1gyBXGPgi51DWn0FPdzY4k19kYsL8vMYkZ/aMNuxwE=
+github.com/k14s/ytt v0.27.1/go.mod h1:aqGLSpChNeJO+ozZwOYkSKb0gXSYynTO+k6aQ6g5U0A=
 github.com/kisielk/errcheck v1.1.0/go.mod h1:EZBBE59ingxPouuu3KfxchcWSUPOHkagtvWXihfKN4Q=
 github.com/kisielk/errcheck v1.2.0/go.mod h1:/BMXB+zMLi60iA8Vv6Ksmxu/1UDYcXs4uQLJ+jE2L00=
 github.com/kisielk/gotool v1.0.0/go.mod h1:XhKaO+MFFWcvkIS/tQcRk01m1F5IRFswLeQ+oQHNcck=

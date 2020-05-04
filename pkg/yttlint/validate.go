@@ -508,7 +508,9 @@ func convert(value interface{}) *v1.JSONSchemaProps {
 	case nil:
 		return &v1.JSONSchemaProps{
 			Type: "null",
-		}
+			Default: &v1.JSON{
+				Raw: []byte("null"),
+			}}
 
 	default:
 		return &v1.JSONSchemaProps{

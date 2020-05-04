@@ -642,6 +642,8 @@ func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.J
 			errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected boolean got: %s", path, subSchema.Type))
 		}
 
+	case "":
+
 	default:
 		errors = append(errors, appendLocationIfKnownf(subSchema, " unsupported type %s", schema.Type))
 	}

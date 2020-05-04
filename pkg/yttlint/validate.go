@@ -543,30 +543,35 @@ func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.J
 	switch schema.Type {
 	case "object":
 		for key, prop := range schema.Properties {
-			subProp, ok := subSchema.Properties[key]
-			if !ok {
-				subPropT, okT := subSchema.Properties["__ytt_lint_t_"+key]
-				if okT {
-					subErrors := l.isSubset(defs, &subPropT, &prop, fmt.Sprintf("%s.%s", path, key))
-					errors = append(errors, subErrors...)
-				}
-				subPropF, okF := subSchema.Properties["__ytt_lint_f_"+key]
-				if okF {
-					subErrors := l.isSubset(defs, &subPropF, &prop, fmt.Sprintf("%s.%s", path, key))
-					errors = append(errors, subErrors...)
-				}
+			if subSchema.Type == "object" {
 
-				if !okF || !okT {
-					for _, requiredKey := range schema.Required {
-						if requiredKey == key {
-							errors = append(errors, appendLocationIfKnownf(subSchema, "%s missing required entry %s", path, key))
-							//break
+				subProp, ok := subSchema.Properties[key]
+				if !ok {
+					subPropT, okT := subSchema.Properties["__ytt_lint_t_"+key]
+					if okT {
+						subErrors := l.isSubset(defs, &subPropT, &prop, fmt.Sprintf("%s.%s", path, key))
+						errors = append(errors, subErrors...)
+					}
+					subPropF, okF := subSchema.Properties["__ytt_lint_f_"+key]
+					if okF {
+						subErrors := l.isSubset(defs, &subPropF, &prop, fmt.Sprintf("%s.%s", path, key))
+						errors = append(errors, subErrors...)
+					}
+
+					if !okF || !okT {
+						for _, requiredKey := range schema.Required {
+							if requiredKey == key {
+								errors = append(errors, appendLocationIfKnownf(subSchema, "%s missing required entry %s", path, key))
+								//break
+							}
 						}
 					}
+				} else {
+					subErrors := l.isSubset(defs, &subProp, &prop, fmt.Sprintf("%s.%s", path, key))
+					errors = append(errors, subErrors...)
 				}
 			} else {
-				subErrors := l.isSubset(defs, &subProp, &prop, fmt.Sprintf("%s.%s", path, key))
-				errors = append(errors, subErrors...)
+				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected object got: %s", path, subSchema.Type))
 			}
 		}
 

@@ -1,0 +1,18 @@
+---
+jobs:
+- name: build-with-cache
+  plan:
+  - get: dependency
+    trigger: true
+  - task: build
+    timeout: 10m
+    config:
+      platform: linux
+      inputs:
+      - name: dependency
+        path: dep
+      caches:
+      - /cache/my/cache
+      run:
+        path: /bin/my/example
+        args: test

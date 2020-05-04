@@ -71,6 +71,16 @@ func TestValidate(t *testing.T) {
 			Pos: "test:6",
 		}},
 		pedanticErrors: []LinterError{},
+	}, {
+		filename: "../../examples/lint/concourse-caches.yaml",
+		nonPedanticErrors: []LinterError{{
+			Msg: ".jobs[0].plan[1].config.caches[0] expected object got: string",
+			Pos: "test:15",
+		}, {
+			Msg: ".jobs[0].plan[1].config.run.args expected array got: string",
+			Pos: "test:18",
+		}},
+		pedanticErrors: []LinterError{},
 	}}
 
 	for _, testCase := range cases {

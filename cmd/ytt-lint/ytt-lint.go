@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/phil9909/ytt-lint/pkg/format"
 	"github.com/phil9909/ytt-lint/pkg/pull"
 	"github.com/phil9909/ytt-lint/pkg/yttlint"
 )
@@ -31,9 +32,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	if *outputFormat != "json" && *outputFormat != "human" {
-		fmt.Fprintf(os.Stderr, "Unsupported output format '%s' use json or human\n", *outputFormat)
+	formatter, err := format.GetFormatter(format.Format(*outputFormat))
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+
 	}
 
 	var data []byte
@@ -72,5 +75,7 @@ func main() {
 	linter := yttlint.Linter{
 		Pedantic: pedantic,
 	}
-	linter.Lint(string(data), file, *outputFormat)
+
+	errors := linter.Lint(string(data), file)
+	formatter.Format(os.Stdout, errors)
 }

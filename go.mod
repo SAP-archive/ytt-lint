@@ -6,6 +6,7 @@ require (
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/k14s/ytt v0.27.1
 	github.com/onsi/gomega v1.9.0
+	github.com/pkg/errors v0.8.1
 	go.starlark.net v0.0.0-20190219202100-4eb76950c5f0
 	golang.org/x/crypto v0.0.0-20200302210943-78000ba7a073 // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect

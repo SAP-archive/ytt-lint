@@ -169,33 +169,7 @@ type Linter struct {
 }
 
 // Lint applies linting to a given ytt template
-func (l *Linter) Lint(data, filename string, outputFormat string) []LinterError {
-	errors := l.lint(data, filename)
-
-	switch outputFormat {
-	case "json":
-		jsonErrors, err := json.Marshal(errors)
-		if err != nil {
-			fmt.Printf("Eval: %s\n", err.Error())
-			os.Exit(1)
-		}
-		fmt.Println(string(jsonErrors))
-
-	case "human":
-		if len(errors) == 0 {
-			fmt.Println("No errors found")
-		} else {
-			for _, err := range errors {
-				fmt.Printf("error: %s @ %s\n", err.Msg, err.Pos)
-			}
-		}
-		fmt.Println()
-	}
-
-	return errors
-}
-
-func (l *Linter) lint(data, filename string) []LinterError {
+func (l *Linter) Lint(data, filename string) []LinterError {
 	docSet, err := yamlmeta.NewDocumentSetFromBytes([]byte(data), yamlmeta.DocSetOpts{AssociatedName: filename})
 	if err != nil {
 		msg := err.Error()

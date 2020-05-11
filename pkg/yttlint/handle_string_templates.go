@@ -55,6 +55,7 @@ func injectStringTemplateHandling(val interface{}) {
 	case string:
 	case int:
 	case bool:
+	case float64:
 
 	default:
 		panic(fmt.Sprintf("unsupported type hit injectStringTemplateHandling %T", typedVal))

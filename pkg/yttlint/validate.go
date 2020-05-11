@@ -153,6 +153,7 @@ func injectIfHandling(val interface{}) {
 	case string:
 	case int:
 	case bool:
+	case float64:
 
 	default:
 		panic(fmt.Sprintf("unsupported type hit injectIfHandling %T", typedVal))

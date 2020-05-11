@@ -68,9 +68,12 @@ func TestValidate(t *testing.T) {
 		filename: "../../examples/lint/empty-pod.yaml",
 		nonPedanticErrors: []LinterError{{
 			Msg: ".spec.containers expected array got: null",
-			Pos: "test:6",
+			Pos: "test:7",
 		}},
-		pedanticErrors: []LinterError{},
+		pedanticErrors: []LinterError{{
+			Msg: ".spec.imagePullSecrets expected array got a computed value",
+			Pos: "test:8",
+		}},
 	}, {
 		filename: "../../examples/lint/concourse-caches.yaml",
 		nonPedanticErrors: []LinterError{{

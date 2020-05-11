@@ -599,7 +599,13 @@ func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.J
 
 	case "array":
 		if subSchema.Type != "array" {
-			errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected array got: %s", path, subSchema.Type))
+			if subSchema.Type == "magic" {
+				if l.Pedantic {
+					errors = append(errors, appendLocationIfKnownf(subSchema, `%s expected array got a computed value`, path))
+				}
+			} else {
+				errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected array got: %s", path, subSchema.Type))
+			}
 		} else {
 			itemsSchema := schema.Items.Schema
 			for i, item := range subSchema.Items.JSONSchemas {

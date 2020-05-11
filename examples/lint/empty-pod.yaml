@@ -1,6 +1,8 @@
+#@ load("@ytt:data", "data")
 apiVersion: v1
 kind: Pod
 metadata:
   name: empty-pod
 spec:
   containers: null
+  imagePullSecrets: #@ data.secrets

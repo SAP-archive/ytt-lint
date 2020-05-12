@@ -54,3 +54,7 @@ Open an issue on this repo. If possible include a ytt-template or plain-yaml-fil
 
 This project heavily depends on [ytt](https://github.com/k14s/ytt), which itself is based on the [Starlark in Go](https://github.com/google/starlark-go) project.
 Kudos also to the [Kubernetes project](https://kubernetes.io/), which provide JSON Schemas for their resources, and [cappyzawa](https://github.com/cappyzawa), who created a [JSON Schema for Concourse pipelines](https://github.com/cappyzawa/concourse-pipeline-jsonschema).
+
+# License
+
+Copyright (c) 2020 SAP SE or an SAP affiliate company. All rights reserved. This file and all other files in this repository are licensed under the "Apache License, v 2.0" except as noted otherwise in the [LICENSE](/LICENSE.md) file.

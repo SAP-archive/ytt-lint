@@ -1,0 +1,107 @@
+{
+    "3da40f6328f42cbc970672f8129e0ecb6e2cc4f5117a072593ba247276354454": {
+        "license": "MIT",
+        "licensor": "Onsi Fakhouri",
+        "year": "2013-2014"
+    },
+    "43074981fd47262577cb5a8698e29ff6cb0bd135802782168fa58a2d882ee1b4": {
+        "license": "Apache-2.0"
+    },
+    "8d427fd87bc9579ea368fde3d49f9ca22eac857f91a9dec7e3004bdfab7dee86": {
+        "license": "BSD-2-Clause",
+        "licensor": "Dave Cheney <dave@cheney.net>",
+        "year": "2015"
+    },
+    "6a39e0d3cee7249e7a0d5a16237969f25944335f4b8b36bf1358f55f57cde7d8": {
+        "license": "BSD-3-Clause",
+        "licensor": "The Bazel Authors",
+        "year": "2017"
+    },
+    "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30": {
+        "license": "Apache-2.0",
+        "licensor": "",
+        "year": ""
+    },
+    "90725410b3207ef341e26fbc23c062abd618596f95215476324c172c5807f5c5": {
+        "licensor": "Pivotal Software, Inc.",
+        "year": "2019 - Present"
+    },
+    "k8s.io/apiextensions-apiserver": {
+        "licensor": "The Kubernetes Authors",
+        "website": "https://kubernetes.io/",
+        "year": "unspecified"
+    },
+    "k8s.io/apimachinery": {
+        "licensor": "The Kubernetes Authors",
+        "website": "https://kubernetes.io/",
+        "year": "unspecified"
+    },
+    "k8s.io/client-go": {
+        "licensor": "The Kubernetes Authors",
+        "website": "https://kubernetes.io/",
+        "year": "unspecified"
+    },
+    "github.com/k14s/ytt": {
+        "website": "https://get-ytt.io/"
+    },
+    "github.com/onsi/gomega": {
+        "website": "https://onsi.github.io/gomega/"
+    },
+    "github.com/pkg/errors": {
+        "website": "https://github.com/pkg/errors"
+    },
+    "go.starlark.net": {
+        "website": "https://go.starlark.net/"
+    },
+    "27ebda9d51f0a56b7e281ccd8230a27236dcb51c05f64b07869ecf6e965d68b0": {
+        "year": "",
+        "licensor": "Microsoft Corporation"
+    },
+    "@types/glob": {
+        "year": "unspecified"
+    },
+    "@types/mocha": {
+        "year": "unspecified"
+    },
+    "@types/node": {
+        "year": "unspecified"
+    },
+    "@types/vscode": {
+        "year": "unspecified"
+    },
+    "db83f2ede67f36cfab1ea0721ea2ee97515863e9a65346881f305e430451cc91": {
+        "year": ""
+    },
+    "eslint": {
+        "year": "unspecified"
+    },
+    "e2fc706570305bcb7dfadb1cac951d5934ce0d7331a7a7ff1bbc254dbe1d9ef8": {
+        "year": "",
+        "licensor": "JS Foundation and other contributors, https://js.foundation"
+    },
+    "@typescript-eslint/parser": {
+        "year": "unspecified"
+    },
+    "5938d4fe4890c79ad14e02e643c385b25b8b6c7bbb97ab08996034b586512df5": {
+        "year": "2019",
+        "licensor": "TypeScript ESLint and other contributors"
+    },
+    "6236fa0b88a4a0cce3dda0367979491b2052b3c8d6b1c10b3668de083e86a7f0": {
+        "year": ""
+    },
+    "glob": {
+        "year": "unspecified"
+    },
+    "88597c9a3af6b6ae2fa6225a52344c7ddc705883d6fe1f2b3a95fdc72d2d1a20": {
+        "year": "2011-2020"
+    },
+    "typescript": {
+        "year": "unspecified"
+    },
+    "811c2e0617b17892f518aa11807144e69d17e3f3b9d80dc038e283f8e65283c2": {
+        "year": ""
+    },
+    "vscode-test": {
+        "year": "unspecified"
+    }
+}

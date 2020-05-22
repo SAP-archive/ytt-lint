@@ -11,7 +11,7 @@
 		"url": "https://github.com/SAP/ytt-lint"
 	},
 	"description": "ytt lint validates ytt-templates and plain yaml-files. It is designed for Kubernetes artifacts, but works with other yaml-files.",
-	"version": "0.0.5",
+	"version": "0.1.0",
 	"engines": {
 		"vscode": "^1.41.0"
 	},

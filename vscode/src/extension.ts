@@ -3,6 +3,18 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 
+function getExecPath(context: vscode.ExtensionContext) {
+	var os: string = process.platform;
+	if (os  === "win32") {
+		os = "windows";
+	}
+	var path = context.asAbsolutePath(`bin/ytt-lint-${os}`);
+	if (os != "windows") {
+		child_process.exec(`chmod +x "${path}"`);
+	}
+	return path;
+}
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
@@ -13,11 +25,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let timeout: NodeJS.Timer | undefined = undefined;
 
 	const SCHEMA_PATH = context.asAbsolutePath(`schema`);
-	const EXEC_PATH = context.asAbsolutePath(`bin/ytt-lint`);
-	
-	if (process.platform != "win32") {
-		child_process.exec(`chmod +x "${EXEC_PATH}"`)
-	}
+	const EXEC_PATH = getExecPath(context);
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand

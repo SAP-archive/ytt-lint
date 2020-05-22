@@ -16,6 +16,10 @@ def build(target_os:str = "native") -> None:
         target_os = platform.system().lower()
     print("Packing for %s" % target_os)
 
+    oses = [target_os]
+    if target_os == "bundle":
+        oses = ["linux", "darwin", "windows"]
+
     packagejson = os.path.join(util.getextensiondir(), "package.json")
     extension_version = json.load(open(packagejson))["version"]
 
@@ -24,13 +28,15 @@ def build(target_os:str = "native") -> None:
 
     shutil.copy2(src_name, dst_name)
     zip = zipfile.ZipFile(dst_name, 'a', compression=zipfile.ZIP_DEFLATED)
-    zip.write("out/ytt-lint-%s" % target_os, "extension/bin/ytt-lint")
+    for bundel_os in oses:
+        zip.write("out/ytt-lint-%s" % bundel_os, "extension/bin/ytt-lint-%s" % bundel_os)
     zip.close()
 
 def all() -> None:
     build(target_os="linux")
     build(target_os="darwin")
     build(target_os="windows")
+    build(target_os="bundle")
 
 if __name__ == "__main__":
     

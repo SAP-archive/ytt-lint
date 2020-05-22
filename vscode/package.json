@@ -1,11 +1,16 @@
 {
 	"name": "ytt-lint",
-	"displayName": "ytt-lint",
+	"displayName": "ytt lint",
 	"publisher": "phil9909",
+	"homepage": "https://github.com/SAP/ytt-lint/blob/master/README.md",
+	"bugs": {
+	  "url": "https://github.com/SAP/ytt-lint/issues"
+	},
 	"repository": {
+		"type": "git",
 		"url": "https://github.com/SAP/ytt-lint"
 	},
-	"description": "Runs linting on your ytt-templates and yaml-files.",
+	"description": "ytt lint validates ytt-templates and plain yaml-files. It is designed for Kubernetes artifacts, but works with other yaml-files.",
 	"version": "0.0.5",
 	"engines": {
 		"vscode": "^1.41.0"
@@ -14,6 +19,11 @@
 		"Linters"
 	],
 	"icon": "icon/icon.png",
+	"galleryBanner": {
+		"color": "#F0AB00",
+		"theme": "light"
+	},
+	"license": "Apache-2.0",
 	"activationEvents": [
 		"onCommand:extension.pullSchemaK8S",
 		"onLanguage:yaml"

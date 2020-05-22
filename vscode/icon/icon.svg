@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0 (6e3e5246a0, 2020-05-07)"
+   sodipodi:docname="icon.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1.903"
+     inkscape:cx="503.29004"
+     inkscape:cy="270.34753"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     inkscape:window-width="3777"
+     inkscape:window-height="2096"
+     inkscape:window-x="1983"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     showguides="false" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     transform="translate(284,284)"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <circle
+       r="256"
+       cy="-28"
+       cx="-28"
+       id="ellipse873"
+       style="fill:#000000;fill-opacity:1;fill-rule:evenodd;stroke-width:0.319777;filter:url(#filter1161);image-rendering:auto" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:199.696px;line-height:1.25;font-family:sans-serif;fill:#000000;fill-opacity:1;stroke:none;stroke-width:4.9924"
+       x="-212.24101"
+       y="26.311852"
+       id="text847"><tspan
+         sodipodi:role="line"
+         id="tspan845"
+         x="-212.24101"
+         y="26.311852"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Waree;-inkscape-font-specification:Waree;fill:#f0ab00;fill-opacity:1;stroke-width:4.9924">#@</tspan></text>
+  </g>
+</svg>

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/phil9909/ytt-lint/pkg/yttlint"
+	"github.com/SAP/ytt-lint/pkg/yttlint"
 	"github.com/pkg/errors"
 )
 

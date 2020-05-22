@@ -1,4 +1,4 @@
-module github.com/phil9909/ytt-lint
+module github.com/SAP/ytt-lint
 
 go 1.13
 

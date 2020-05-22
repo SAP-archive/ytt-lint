@@ -8,9 +8,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/phil9909/ytt-lint/pkg/format"
-	"github.com/phil9909/ytt-lint/pkg/pull"
-	"github.com/phil9909/ytt-lint/pkg/yttlint"
+	"github.com/SAP/ytt-lint/pkg/format"
+	"github.com/SAP/ytt-lint/pkg/pull"
+	"github.com/SAP/ytt-lint/pkg/yttlint"
 )
 
 func main() {

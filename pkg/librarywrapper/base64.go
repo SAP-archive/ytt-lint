@@ -5,9 +5,10 @@ import (
 
 	"github.com/k14s/ytt/pkg/template/core"
 	"github.com/k14s/ytt/pkg/yttlibrary"
-	"github.com/phil9909/ytt-lint/pkg/magic"
 	"go.starlark.net/starlark"
 	"go.starlark.net/starlarkstruct"
+
+	"github.com/SAP/ytt-lint/pkg/magic"
 )
 
 var (

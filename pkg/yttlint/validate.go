@@ -18,10 +18,11 @@ import (
 	"github.com/k14s/ytt/pkg/yamlmeta"
 	"github.com/k14s/ytt/pkg/yamltemplate"
 	"github.com/k14s/ytt/pkg/yttlibrary"
-	_ "github.com/phil9909/ytt-lint/pkg/librarywrapper" // inject into lib
-	"github.com/phil9909/ytt-lint/pkg/magic"
 	"go.starlark.net/starlark"
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+
+	_ "github.com/SAP/ytt-lint/pkg/librarywrapper" // inject into lib
+	"github.com/SAP/ytt-lint/pkg/magic"
 )
 
 type myTemplateLoader struct {

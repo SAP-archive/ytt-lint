@@ -3,7 +3,7 @@
 	"displayName": "ytt-lint",
 	"publisher": "phil9909",
 	"repository": {
-		"url": "https://github.com/phil9909/ytt-lint"
+		"url": "https://github.com/SAP/ytt-lint"
 	},
 	"description": "Runs linting on your ytt-templates and yaml-files.",
 	"version": "0.0.5",

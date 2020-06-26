@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/SAP/ytt-lint/pkg/format"
@@ -61,14 +62,36 @@ func main() {
 			os.Exit(1)
 		}
 		if stat.IsDir() {
-			fmt.Fprintf(os.Stderr, "%s is a directory", file)
-			os.Exit(1)
-		}
+			errors := []yttlint.LinterError{}
+			filepath.Walk(file, func(path string, info os.FileInfo, _ error) error {
+				if info.IsDir() {
+					return nil
+				}
+				if !strings.HasSuffix(path, ".yaml") && !strings.HasSuffix(path, ".yml") {
+					return nil
+				}
 
-		data, err = ioutil.ReadFile(file)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
+				data, err = ioutil.ReadFile(path)
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "%v\n", err)
+					os.Exit(1)
+				}
+				linter := yttlint.Linter{
+					Pedantic: pedantic,
+				}
+				fileErrors := linter.Lint(string(data), path)
+				errors = append(errors, fileErrors...)
+
+				return nil
+			})
+			formatter.Format(os.Stdout, errors)
+			os.Exit(0)
+		} else {
+			data, err = ioutil.ReadFile(file)
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "%v\n", err)
+				os.Exit(1)
+			}
 		}
 
 	}

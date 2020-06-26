@@ -65,14 +65,20 @@ export function activate(context: vscode.ExtensionContext) {
 
 		// TODO: don't use '-f -' if file is saved
 		let yaml = doc.getText();
+		let root = vscode.workspace.getWorkspaceFolder(doc.uri)?.uri.path;
 
 		console.log('Running lint now!');
 
 		diagnosticCollection.clear();
 		let diagnosticMap: Map<string, vscode.Diagnostic[]> = new Map();
 
+		let args = ['-f', `-:${doc.fileName}`, '-o', 'json'];
+		if (root) {
+			args.push('--root');
+			args.push(root);
+		}
 		// TODO: use spwan and then stream
-		let linter = child_process.execFile(EXEC_PATH, ['-f', `-:${doc.fileName}`, '-o', 'json'], {
+		let linter = child_process.execFile(EXEC_PATH, args, {
 			env: Object.assign({YTT_LINT_SCHEMA_PATH: SCHEMA_PATH}, process.env)
 		}, (error, stdout, stderr) => {
 			console.log('Done linting:', error, stdout, stderr);

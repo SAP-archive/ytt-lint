@@ -31,6 +31,10 @@ To pull the CRD schemas from the current kubernetes cluster:
 
 The schemas will then be stored locally. You might need to run this from time to time, if you update a controller or install a new one to your cluster.
 
+## Excluding files
+
+ytt-lint supports a git-like ignore file. To make use of it create a folder called ".ytt-lint" in your projects-root and put a file called "ignore" in there.
+
 ## Troubleshooting
 
 ### VSCode or VSCodium does not show any linter errors

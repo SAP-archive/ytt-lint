@@ -7,6 +7,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 
@@ -16,11 +17,13 @@ import (
 )
 
 var linter yttlint.Linter
+var file, rootFolder string
+var excludeList []string
 
 func main() {
-	var file string
 	var pedantic, pullFromK8S bool
 	flag.StringVar(&file, "f", "-", "File to validate")
+	flag.StringVar(&rootFolder, "root", "", "Root folder for validation (defaults to directory containing target file)")
 	flag.BoolVar(&pedantic, "p", false, "Use pedantic linting mode")
 	flag.BoolVar(&pullFromK8S, "pull-from-k8s", false, "Pull crd schemas from Kubernetes cluster")
 	outputFormat := flag.String("o", "human", "Output format: either human or json")
@@ -47,19 +50,31 @@ func main() {
 		Pedantic: pedantic,
 	}
 
-	var in io.Reader
 	errors := []yttlint.LinterError{}
 
-	if file == "-" || strings.HasPrefix(file, "-:") {
-		in = os.Stdin
+	stdin := false
+	if strings.HasPrefix(file, "-:") {
 		parts := strings.SplitN(file, ":", 2)
-		if len(parts) == 2 {
-			file = parts[1]
-		}
+		file = parts[1]
+		stdin = true
+	} else if file == "-" {
+		stdin = true
+	}
 
-		errors = lintReader(in, file)
+	if file != "-" && isEntryFileExclude() {
+		fmt.Fprintf(os.Stderr, "Warning '%s' is excluded. Won't lint anything\n", file)
+		formatter.Format(os.Stdout, errors)
+		os.Exit(0)
+	}
+
+	if stdin {
+		errors = lintReader(os.Stdin, file)
 	} else {
 		err := filepath.Walk(file, func(path string, info os.FileInfo, _ error) error {
+			if isFileExcluded(path) {
+				return filepath.SkipDir
+			}
+
 			if info.IsDir() {
 				return nil
 			}
@@ -97,4 +112,92 @@ func lintReader(in io.Reader, filename string) []yttlint.LinterError {
 		os.Exit(1)
 	}
 	return linter.Lint(string(data), filename)
+}
+
+func getRootFolder() string {
+	if rootFolder == "" {
+		stat, err := os.Stat(file)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+		if stat.IsDir() {
+			rootFolder = file
+		} else {
+			rootFolder = filepath.Dir(file)
+		}
+	}
+	return rootFolder
+}
+
+func isEntryFileExclude() bool {
+	root := getRootFolder()
+	f := file
+
+	for {
+		isExcluded := isFileExcluded(f)
+		if isExcluded {
+			return true
+		}
+
+		f = filepath.Dir(f)
+		rel, err := filepath.Rel(root, f)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+
+		if rel == "." {
+			return false
+		}
+	}
+
+}
+
+func isFileExcluded(filename string) bool {
+	root := getRootFolder()
+
+	if excludeList == nil {
+		ignoreFile := path.Join(root, ".ytt-lint", "ignore")
+		list, err := ioutil.ReadFile(ignoreFile)
+		if err != nil {
+			if os.IsNotExist(err) {
+				excludeList = []string{}
+				return false
+			}
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+		excludeList = []string{}
+		excludeListUnfiltered := strings.Split(string(list), "\n")
+		for _, item := range excludeListUnfiltered {
+			item = strings.TrimSuffix(strings.TrimSpace(item), "/")
+			if item == "" || strings.HasPrefix(item, "#") {
+				continue
+			}
+			excludeList = append(excludeList, item)
+		}
+	}
+
+	filename, err := filepath.Rel(root, filename)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	if strings.HasPrefix(filename, "../") {
+		fmt.Fprintln(os.Stderr, "file is outside root")
+		os.Exit(1)
+	}
+
+	for _, exclude := range excludeList {
+		matched, err := filepath.Match(exclude, filename)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
+		}
+		if matched {
+			return true
+		}
+	}
+	return false
 }

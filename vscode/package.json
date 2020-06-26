@@ -4,14 +4,14 @@
 	"publisher": "phil9909",
 	"homepage": "https://github.com/SAP/ytt-lint/blob/master/README.md",
 	"bugs": {
-	  "url": "https://github.com/SAP/ytt-lint/issues"
+		"url": "https://github.com/SAP/ytt-lint/issues"
 	},
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/SAP/ytt-lint"
 	},
 	"description": "ytt lint validates ytt-templates and plain yaml-files. It is designed for Kubernetes artifacts, but works with other yaml-files.",
-	"version": "0.1.0",
+	"version": "0.2.0",
 	"engines": {
 		"vscode": "^1.41.0"
 	},

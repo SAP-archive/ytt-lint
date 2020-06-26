@@ -24,6 +24,13 @@ Everything
 
 ## Release Notes
 
+### 0.2.0 - ignore
+
+- support a git-like ignore file
+- detect helm-templates and warn
+- support ytt 0.28.0
+- support recursive linting of directories
+
 ### 0.1.0 - new home
 
 - ytt-lint has a new home at https://github.com/SAP/ytt-lint

@@ -176,8 +176,8 @@ with open("THIRD-PARTY-NOTICES.txt", "w") as target:
             lookupKey = placeholders[placeholder]
             print("%s = %s" % (placeholder, license[lookupKey]), file=target)
 
-
-    for license in set([x["license"] for x in licenses]):
+    print(licenses)
+    for license in sorted(set([x["license"] for x in licenses])):
         #print(license)
         cache = "./.notice/license-%s" % license
         if not os.path.isfile(cache):

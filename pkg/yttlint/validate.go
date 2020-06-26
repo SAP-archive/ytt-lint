@@ -218,7 +218,7 @@ func (l *Linter) lint(data, filename string) []LinterError {
 
 	//fmt.Printf("### template:\n%s\n", compiledTemplate.DebugCodeAsString())
 	loader := myTemplateLoader{compiledTemplate: compiledTemplate, name: filename}
-	loader.TemplateLoader = workspace.NewTemplateLoader(&yamlmeta.Document{}, core.NewPlainUI(false), workspace.TemplateLoaderOpts{
+	loader.TemplateLoader = workspace.NewTemplateLoader(workspace.NewEmptyDataValues(), []*workspace.DataValues{}, core.NewPlainUI(false), workspace.TemplateLoaderOpts{
 		IgnoreUnknownComments: true,
 	}, nil)
 	var rootLib *workspace.Library
@@ -695,7 +695,7 @@ func newAPIandLib(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader 
 	library := workspace.NewLibraryModule(workspace.LibraryExecutionContext{
 		Current: rootLib,
 		Root:    rootLib,
-	}, libraryExecutionFactory)
+	}, libraryExecutionFactory, []*workspace.DataValues{})
 	libraryModule := library.AsModule()
 
 	api := yttlibrary.NewAPI(replaceNodeFunc, yttlibrary.NewDataModule(&yamlmeta.Document{}, loader), libraryModule)

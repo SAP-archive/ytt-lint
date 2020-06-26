@@ -170,7 +170,21 @@ type Linter struct {
 }
 
 // Lint applies linting to a given ytt template
-func (l *Linter) Lint(data, filename string) []LinterError {
+func (l *Linter) Lint(data, filename string) (errors []LinterError) {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, "Recovered '%v' while linting %s \n", r, filename)
+			errors = []LinterError{{
+				Msg: fmt.Sprintf("could not lint because of an internal error: %v", r),
+				Pos: fmt.Sprintf("%s:1", filename),
+			}}
+		}
+	}()
+	errors = l.lint(data, filename)
+	return
+}
+
+func (l *Linter) lint(data, filename string) []LinterError {
 	docSet, err := yamlmeta.NewDocumentSetFromBytes([]byte(data), yamlmeta.DocSetOpts{AssociatedName: filename})
 	if err != nil {
 		msg := err.Error()

@@ -38,9 +38,7 @@ func (l myTemplateLoader) FindCompiledTemplate(module string) (*template.Compile
 	if module == l.name {
 		return l.compiledTemplate, nil
 	}
-	return nil, fmt.Errorf("FindCompiledTemplate(%s) is not supported", module)
-
-	//	return l.compiledTemplate, nil
+	return l.TemplateLoader.FindCompiledTemplate(module)
 }
 
 func (l myTemplateLoader) Load(

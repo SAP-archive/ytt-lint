@@ -182,7 +182,19 @@ func (l *Linter) Lint(data, filename string) (errors []LinterError) {
 	return
 }
 
+var helmChartRegex = regexp.MustCompile("{{")
+
 func (l *Linter) lint(data, filename string) []LinterError {
+	helm := helmChartRegex.FindStringIndex(data)
+	if helm != nil {
+		firstHelmLine := strings.Count(data[:helm[0]], "\n") + 1
+		return []LinterError{{
+			Msg:  "This looks like helm syntax, skipping this file",
+			Pos:  fmt.Sprintf("%s:%d", filename, firstHelmLine),
+			Code: ErrorCodeHelm,
+		}}
+	}
+
 	docSet, err := yamlmeta.NewDocumentSetFromBytes([]byte(data), yamlmeta.DocSetOpts{AssociatedName: filename})
 	if err != nil {
 		msg := err.Error()

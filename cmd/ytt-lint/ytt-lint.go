@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -13,6 +14,8 @@ import (
 	"github.com/SAP/ytt-lint/pkg/pull"
 	"github.com/SAP/ytt-lint/pkg/yttlint"
 )
+
+var linter yttlint.Linter
 
 func main() {
 	var file string
@@ -40,65 +43,58 @@ func main() {
 
 	}
 
-	var data []byte
+	linter = yttlint.Linter{
+		Pedantic: pedantic,
+	}
+
+	var in io.Reader
+	errors := []yttlint.LinterError{}
 
 	if file == "-" || strings.HasPrefix(file, "-:") {
-		var err error
-		reader := bufio.NewReader(os.Stdin)
-		data, err = ioutil.ReadAll(reader)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
-		}
+		in = os.Stdin
 		parts := strings.SplitN(file, ":", 2)
 		if len(parts) == 2 {
 			file = parts[1]
 		}
 
+		errors = lintReader(in, file)
 	} else {
-		stat, err := os.Stat(file)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "%v\n", err)
-			os.Exit(1)
-		}
-		if stat.IsDir() {
-			errors := []yttlint.LinterError{}
-			filepath.Walk(file, func(path string, info os.FileInfo, _ error) error {
-				if info.IsDir() {
-					return nil
-				}
-				if !strings.HasSuffix(path, ".yaml") && !strings.HasSuffix(path, ".yml") {
-					return nil
-				}
-
-				data, err = ioutil.ReadFile(path)
-				if err != nil {
-					fmt.Fprintf(os.Stderr, "%v\n", err)
-					os.Exit(1)
-				}
-				linter := yttlint.Linter{
-					Pedantic: pedantic,
-				}
-				fileErrors := linter.Lint(string(data), path)
-				errors = append(errors, fileErrors...)
-
+		err := filepath.Walk(file, func(path string, info os.FileInfo, _ error) error {
+			if info.IsDir() {
 				return nil
-			})
-			formatter.Format(os.Stdout, errors)
-			os.Exit(0)
-		} else {
-			data, err = ioutil.ReadFile(file)
+			}
+			if !strings.HasSuffix(path, ".yaml") && !strings.HasSuffix(path, ".yml") && file != path {
+				return nil
+			}
+
+			fp, err := os.Open(path)
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "%v\n", err)
 				os.Exit(1)
 			}
+			defer fp.Close()
+			fileErrors := lintReader(fp, path)
+			errors = append(errors, fileErrors...)
+
+			return nil
+		})
+
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "%v\n", err)
+			os.Exit(1)
 		}
 
 	}
-	linter := yttlint.Linter{
-		Pedantic: pedantic,
-	}
 
-	errors := linter.Lint(string(data), file)
 	formatter.Format(os.Stdout, errors)
+}
+
+func lintReader(in io.Reader, filename string) []yttlint.LinterError {
+	reader := bufio.NewReader(in)
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	return linter.Lint(string(data), filename)
 }

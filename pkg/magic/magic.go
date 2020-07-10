@@ -89,6 +89,24 @@ func (mt *MagicType) Binary(op syntax.Token, y starlark.Value, side starlark.Sid
 	}, nil
 }
 
+var _ starlark.Sliceable = &MagicType{}
+
+func (mt *MagicType) Slice(start, end, step int) starlark.Value {
+	return &MagicType{
+		CouldBeString: true,
+		CouldBeInt:    true,
+		CouldBeFloat:  true,
+	}
+}
+
+func (mt *MagicType) Index(i int) starlark.Value {
+	return &MagicType{
+		CouldBeString: true,
+		CouldBeInt:    true,
+		CouldBeFloat:  true,
+	}
+}
+
 func (mt *MagicType) AsGoValue() interface{} {
 	return mt
 }

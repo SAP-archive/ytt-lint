@@ -1,0 +1,8 @@
+---
+#@ load("@ytt:data", "data")
+
+#@ name = data.values.name
+#@ suffix = name[len("prefix-"):]
+
+name: #@ name
+suffix: #@ suffix

@@ -84,6 +84,12 @@ func TestValidate(t *testing.T) {
 			Pos: "test:18",
 		}},
 		pedanticErrors: []LinterError{},
+	}, {
+		filename:          "../../examples/lint/array-access.yaml",
+		nonPedanticErrors: []LinterError{},
+		pedanticErrors:    []LinterError{
+			// TODO: warn that it might not be a sliceable
+		},
 	}}
 
 	for _, testCase := range cases {

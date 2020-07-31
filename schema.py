@@ -4,6 +4,7 @@ import json
 import os.path
 import os
 import urllib.request
+import devlib.util
 
 def findRefs(o):
     if "$ref" in o and isinstance(o["$ref"], str):
@@ -62,7 +63,7 @@ def extraceSchema(file):
         }
         
         for gvk in root["x-kubernetes-group-version-kind"]:
-            target_dir = os.path.join("schema", "core" if gvk["group"] == "" else gvk["group"], gvk["version"])
+            target_dir = os.path.join(devlib.util.getextensiondir(), "schema", "core" if gvk["group"] == "" else gvk["group"], gvk["version"])
             target = os.path.join(target_dir, gvk["kind"].lower() + ".json")
             print(target)
             os.makedirs(target_dir, exist_ok=True)

@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
 import json
+import os
+import os.path
 import urllib.request
+import devlib.util
 
 
-in_name  =  "https://raw.githubusercontent.com/cappyzawa/concourse-pipeline-jsonschema/master/concourse_jsonschema.json"
-out_name = "vscode/schema/builtin/concourse.json"
+in_name    = "https://raw.githubusercontent.com/cappyzawa/concourse-pipeline-jsonschema/master/concourse_jsonschema.json"
+target_dir = os.path.join(devlib.util.getextensiondir(), "schema", "builtin")
+out_name   = os.path.join(target_dir, "concourse.json")
 
 def adapt(data):
     if isinstance(data, dict):
@@ -25,4 +29,5 @@ filedata = urllib.request.urlopen(in_name)
 schema = json.load(filedata)
 schema = adapt(schema)
 schema["definitions"]["Config"]["additionalProperties"] = True
+os.makedirs(target_dir, exist_ok=True)
 json.dump(schema, open(out_name, "w"), indent=2)

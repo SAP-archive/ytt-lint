@@ -1,0 +1,32 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    name: build-and-test
+    runs-on: ubuntu-latest
+    steps:
+
+    - name: setup
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.14
+      id: go
+
+    - name: checkout
+      uses: actions/checkout@v2
+
+    - name: get dependencies
+      run: go get -v -t -d ./...
+
+    - name: build
+      run: ./devlib/buildgo.py --all
+
+    - name: test
+      run: go test ./...

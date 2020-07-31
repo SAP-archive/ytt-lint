@@ -15,10 +15,10 @@ Validating CRDs is supported! See "Working with CRDs"
 Currently I would not recommend to use ytt-lint from the terminal, as it has no stable interface yet.
 If you still want to try it, got to the releases on this repo.
 
-I recommend using the VSCode / VSCodium extension. You can download it from the releases page and then install it using `code --install-extension /path/to/extension` or `codium --install-extension /path/to/extension`.
+I recommend using the VSCode / VSCodium extension.
+You can find it in the [VisualStudio Marketplace](https://marketplace.visualstudio.com/items?itemName=phil9909.ytt-lint) and in the [Open VSX Registry](https://open-vsx.org/extension/phil9909/ytt-lint).
+Also, you can download it from the releases page and then install it using `code --install-extension /path/to/extension` or `codium --install-extension /path/to/extension`.
 
-Notice: Currently the extension contains a ytt-executable. Because of that the extension file is operating system specific.
-This is because the ytt interface is not yet stable and it make sense to bundle them. This might change in the future.
 
 ## Working with CRDs
 

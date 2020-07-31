@@ -24,6 +24,9 @@ jobs:
 
     - name: get dependencies
       run: go get -v -t -d ./...
+    
+    - name: schema
+      run: ./schema.py && ./concourse-schema.py 
 
     - name: build
       run: ./devlib/buildgo.py --all

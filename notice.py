@@ -165,7 +165,7 @@ with open("THIRD-PARTY-NOTICES.txt", "w") as target:
     print("", file=target)
     print("Components:", file=target)
 
-    for license in licenses:
+    for license in sorted(licenses, key=lambda  x: x["component"].lower()):
         print("", file=target)
         print("Component:", license["component"], file=target)
         print("Licensor:",  license["licensor"], file=target)

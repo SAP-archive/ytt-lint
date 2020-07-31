@@ -9,71 +9,6 @@ In the event that we overlooked to list required notice, please bring this to ou
 
 Components:
 
-Component: Visual Studio Code extension generator 1.2.11
-Licensor: Microsoft Corporation
-Website: https://github.com/Microsoft/vscode-generator-code
-License: MIT
-<year> = unspecified
-<copyright holders> = Microsoft Corporation
-
-Component: The Visual Studio Code Extension Manager
-Licensor: Microsoft Corporation
-Website: https://github.com/microsoft/vscode-vsce
-License: MIT
-<year> = unspecified
-<copyright holders> = Microsoft Corporation
-
-Component: Kubernetes OpenAPI Spec
-Licensor: The Kubernetes Authors
-Website: https://github.com/kubernetes/kubernetes/blob/master/api/openapi-spec/swagger.json
-License: Apache-2.0
-
-Component: concourse-pipeline-jsonschema
-Licensor: Shu Kutsuzawa cappyzawa@yahoo.ne.jp
-Website: https://github.com/cappyzawa/concourse-pipeline-jsonschema
-License: Apache-2.0
-
-Component: github.com/k14s/ytt v0.28.0
-Licensor: Pivotal Software, Inc.
-Website: https://get-ytt.io/
-License: Apache-2.0
-
-Component: github.com/onsi/gomega v1.9.0
-Licensor: Onsi Fakhouri
-Website: https://onsi.github.io/gomega/
-License: MIT
-<year> = 2013-2014
-<copyright holders> = Onsi Fakhouri
-
-Component: github.com/pkg/errors v0.8.1
-Licensor: Dave Cheney <dave@cheney.net>
-Website: https://github.com/pkg/errors
-License: BSD-2-Clause
-<year> = 2015
-<owner> = Dave Cheney <dave@cheney.net>
-
-Component: go.starlark.net v0.0.0-20190219202100-4eb76950c5f0
-Licensor: The Bazel Authors
-Website: https://go.starlark.net/
-License: BSD-3-Clause
-<year> = 2017
-<owner> = The Bazel Authors
-
-Component: k8s.io/apiextensions-apiserver v0.17.4
-Licensor: The Kubernetes Authors
-Website: https://kubernetes.io/
-License: Apache-2.0
-
-Component: k8s.io/apimachinery v0.17.4
-Licensor: The Kubernetes Authors
-Website: https://kubernetes.io/
-License: Apache-2.0
-
-Component: k8s.io/client-go v0.17.4
-Licensor: The Kubernetes Authors
-Website: https://kubernetes.io/
-License: Apache-2.0
-
 Component: @types/glob 7.1.1
 Licensor: Microsoft Corporation
 Website: https://github.com/DefinitelyTyped/DefinitelyTyped#readme
@@ -102,12 +37,12 @@ License: MIT
 <year> = unspecified
 <copyright holders> = Microsoft Corporation
 
-Component: eslint 6.8.0
-Licensor: Nicholas C. Zakas
-Website: https://eslint.org
+Component: @typescript-eslint/eslint-plugin 2.19.0
+Licensor: TypeScript ESLint and other contributors
+Website: https://github.com/typescript-eslint/typescript-eslint#readme
 License: MIT
-<year> = unspecified
-<copyright holders> = Nicholas C. Zakas
+<year> = 2019
+<copyright holders> = TypeScript ESLint and other contributors
 
 Component: @typescript-eslint/parser 2.19.0
 Licensor: JS Foundation and other contributors, https://js.foundation
@@ -116,12 +51,36 @@ License: BSD-2-Clause
 <year> = unspecified
 <owner> = JS Foundation and other contributors, https://js.foundation
 
-Component: @typescript-eslint/eslint-plugin 2.19.0
-Licensor: TypeScript ESLint and other contributors
-Website: https://github.com/typescript-eslint/typescript-eslint#readme
+Component: concourse-pipeline-jsonschema
+Licensor: Shu Kutsuzawa cappyzawa@yahoo.ne.jp
+Website: https://github.com/cappyzawa/concourse-pipeline-jsonschema
+License: Apache-2.0
+
+Component: eslint 6.8.0
+Licensor: Nicholas C. Zakas
+Website: https://eslint.org
 License: MIT
-<year> = 2019
-<copyright holders> = TypeScript ESLint and other contributors
+<year> = unspecified
+<copyright holders> = Nicholas C. Zakas
+
+Component: github.com/k14s/ytt v0.28.0
+Licensor: Pivotal Software, Inc.
+Website: https://get-ytt.io/
+License: Apache-2.0
+
+Component: github.com/onsi/gomega v1.9.0
+Licensor: Onsi Fakhouri
+Website: https://onsi.github.io/gomega/
+License: MIT
+<year> = 2013-2014
+<copyright holders> = Onsi Fakhouri
+
+Component: github.com/pkg/errors v0.8.1
+Licensor: Dave Cheney <dave@cheney.net>
+Website: https://github.com/pkg/errors
+License: BSD-2-Clause
+<year> = 2015
+<owner> = Dave Cheney <dave@cheney.net>
 
 Component: glob 7.1.6
 Licensor: Isaac Z. Schlueter
@@ -130,17 +89,58 @@ License: ISC
 <YEAR> = unspecified
 <OWNER> = Isaac Z. Schlueter
 
-Component: mocha 7.0.1
+Component: go.starlark.net v0.0.0-20190219202100-4eb76950c5f0
+Licensor: The Bazel Authors
+Website: https://go.starlark.net/
+License: BSD-3-Clause
+<year> = 2017
+<owner> = The Bazel Authors
+
+Component: k8s.io/apiextensions-apiserver v0.17.4
+Licensor: The Kubernetes Authors
+Website: https://kubernetes.io/
+License: Apache-2.0
+
+Component: k8s.io/apimachinery v0.17.4
+Licensor: The Kubernetes Authors
+Website: https://kubernetes.io/
+License: Apache-2.0
+
+Component: k8s.io/client-go v0.17.4
+Licensor: The Kubernetes Authors
+Website: https://kubernetes.io/
+License: Apache-2.0
+
+Component: Kubernetes OpenAPI Spec
+Licensor: The Kubernetes Authors
+Website: https://github.com/kubernetes/kubernetes/blob/master/api/openapi-spec/swagger.json
+License: Apache-2.0
+
+Component: mocha 8.1.0
 Licensor: TJ Holowaychuk
 Website: https://mochajs.org/
 License: MIT
 <year> = 2011-2020
 <copyright holders> = TJ Holowaychuk
 
+Component: The Visual Studio Code Extension Manager
+Licensor: Microsoft Corporation
+Website: https://github.com/microsoft/vscode-vsce
+License: MIT
+<year> = unspecified
+<copyright holders> = Microsoft Corporation
+
 Component: typescript 3.7.5
 Licensor: Microsoft Corp.
 Website: https://www.typescriptlang.org/
 License: Apache-2.0
+
+Component: Visual Studio Code extension generator 1.2.11
+Licensor: Microsoft Corporation
+Website: https://github.com/Microsoft/vscode-generator-code
+License: MIT
+<year> = unspecified
+<copyright holders> = Microsoft Corporation
 
 Component: vscode-test 1.3.0
 Licensor: Visual Studio Code Team

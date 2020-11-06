@@ -7,7 +7,7 @@ import urllib.request
 import devlib.util
 
 
-in_name    = "https://raw.githubusercontent.com/cappyzawa/concourse-pipeline-jsonschema/master/concourse_jsonschema.json"
+in_name    = "https://raw.githubusercontent.com/cappyzawa/concourse-pipeline-jsonschema/0961a7b3d34fa3c6af28e0b3e93ef25fcf10c417/concourse_jsonschema.json"
 target_dir = os.path.join(devlib.util.getextensiondir(), "schema", "builtin")
 out_name   = os.path.join(target_dir, "concourse.json")
 

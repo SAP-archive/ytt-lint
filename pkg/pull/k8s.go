@@ -31,6 +31,9 @@ func Pull() error {
 	}
 
 	crdClientset, err := apiextensionsclientset.NewForConfig(config)
+	if err != nil {
+		return fmt.Errorf("apiextensionsclientset.NewForConfig(): %w", err)
+	}
 
 	crds, err := crdClientset.ApiextensionsV1().CustomResourceDefinitions().List(metav1.ListOptions{})
 	if err != nil {

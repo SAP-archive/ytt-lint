@@ -32,7 +32,7 @@ func GetFormatter(format Format) (Formatter, error) {
 	case FormatHuman:
 		return &humanFormatter{}, nil
 	default:
-		return nil, fmt.Errorf("Unsupported output format '%s' use json or human", string(format))
+		return nil, fmt.Errorf("unsupported output format '%s' use json or human", string(format))
 	}
 }
 

@@ -60,25 +60,25 @@ func (l myTemplateLoader) Load(
 }
 
 func (l myTemplateLoader) FilePaths(string) ([]string, error) {
-	return nil, fmt.Errorf("Unexpected call to FilePaths") // this should be handled by the injected magic-data-type
+	return nil, fmt.Errorf("unexpected call to FilePaths") // this should be handled by the injected magic-data-type
 }
 
 func (l myTemplateLoader) FileData(string) ([]byte, error) {
-	return nil, fmt.Errorf("Unexpected call to FileData") // this should be handled by the injected magic-data-type
+	return nil, fmt.Errorf("unexpected call to FileData") // this should be handled by the injected magic-data-type
 }
 
 func (l myTemplateLoader) LoadData(
 	thread *starlark.Thread, f *starlark.Builtin,
 	args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 
-	return nil, fmt.Errorf("LoadData is not supported")
+	return nil, fmt.Errorf("loadData is not supported")
 }
 
 func (l myTemplateLoader) ListData(
 	thread *starlark.Thread, f *starlark.Builtin,
 	args starlark.Tuple, kwargs []starlark.Tuple) (starlark.Value, error) {
 
-	return nil, fmt.Errorf("ListData is not supported")
+	return nil, fmt.Errorf("listData is not supported")
 }
 
 func isIf(meta *yamlmeta.Meta) bool {

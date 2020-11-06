@@ -73,7 +73,7 @@ urlTemplate = "https://raw.githubusercontent.com/kubernetes/kubernetes/v%s/api/o
 cacheTemplate = "./cache/k8s-%s-swagger.json"
 
 os.makedirs("./cache", exist_ok=True)
-for version in ["1.10.0", "1.11.0", "1.12.0", "1.13.0", "1.14.0", "1.15.0", "1.16.0", "1.17.0", "1.18.0"]:
+for version in ["1.10.0", "1.11.0", "1.12.0", "1.13.0", "1.14.0", "1.15.0", "1.16.0", "1.17.0", "1.18.0", "1.19.0"]:
     url = urlTemplate % version
     cache = cacheTemplate % version
     if not os.path.isfile(cache):

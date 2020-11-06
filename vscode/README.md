@@ -24,6 +24,11 @@ Everything
 
 ## Release Notes
 
+### 0.2.1 - kustomize
+
+- add schema for Kustomization
+- add Kubernetes 1.19 schemas
+
 ### 0.2.0 - ignore
 
 - support a git-like ignore file

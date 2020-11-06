@@ -57,7 +57,7 @@ Open an issue on this repo. If possible include a ytt-template or plain-yaml-fil
 # Acknowledgments
 
 This project heavily depends on [ytt](https://github.com/k14s/ytt), which itself is based on the [Starlark in Go](https://github.com/google/starlark-go) project.
-Kudos also to the [Kubernetes project](https://kubernetes.io/), which provide JSON Schemas for their resources, and [cappyzawa](https://github.com/cappyzawa), who created a [JSON Schema for Concourse pipelines](https://github.com/cappyzawa/concourse-pipeline-jsonschema).
+Kudos also to the [Kubernetes project](https://kubernetes.io/), which provide JSON Schemas for their resources, [cappyzawa](https://github.com/cappyzawa), who created a [JSON Schema for Concourse pipelines](https://github.com/cappyzawa/concourse-pipeline-jsonschema) and [JSON Schema Store](https://www.schemastore.org/) for providing the schema for kustomization.yaml.
 
 # License
 

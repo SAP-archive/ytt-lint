@@ -123,6 +123,11 @@ License: MIT
 <year> = 2011-2020
 <copyright holders> = TJ Holowaychuk
 
+Component: schemastore
+Licensor: Mads Kristensen
+Website: https://www.schemastore.org
+License: Apache-2.0
+
 Component: The Visual Studio Code Extension Manager
 Licensor: Microsoft Corporation
 Website: https://github.com/microsoft/vscode-vsce

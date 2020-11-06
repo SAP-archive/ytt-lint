@@ -7,6 +7,9 @@ import urllib.request
 import devlib.util
 
 def findRefs(o):
+    if isinstance(o, bool):
+        return []
+
     if "$ref" in o and isinstance(o["$ref"], str):
         return [o["$ref"]]
  
@@ -72,12 +75,30 @@ def extraceSchema(file):
 urlTemplate = "https://raw.githubusercontent.com/kubernetes/kubernetes/v%s/api/openapi-spec/swagger.json"
 cacheTemplate = "./cache/k8s-%s-swagger.json"
 
+swagger_files = []
+
 os.makedirs("./cache", exist_ok=True)
 for version in ["1.10.0", "1.11.0", "1.12.0", "1.13.0", "1.14.0", "1.15.0", "1.16.0", "1.17.0", "1.18.0", "1.19.0"]:
-    url = urlTemplate % version
-    cache = cacheTemplate % version
-    if not os.path.isfile(cache):
-        print("Downloading swagger.json for %s from %s" % (version, url))
-        urllib.request.urlretrieve(url, cache)
-    print("Extracting schemas for %s" % version)
-    extraceSchema(cache)
+    swagger_files.append({
+        "url": urlTemplate % version,
+        "cache": cacheTemplate % version,
+        "name": f"kubernetes@{version}"
+    })
+
+for swagger_file in swagger_files:
+    if not os.path.isfile(swagger_file["cache"]):
+        print("Downloading swagger.json for %s from %s" % (version, swagger_file["url"]))
+        urllib.request.urlretrieve(swagger_file["url"], swagger_file["cache"])
+    print("Extracting schemas for %s" % swagger_file["name"])
+    extraceSchema(swagger_file["cache"])
+
+
+def add_kustomize():
+    target_dir = os.path.join(devlib.util.getextensiondir(), "schema", "k8s", "kustomize.config.k8s.io", "v1beta1")
+    target = os.path.join(target_dir, "kustomization.json")
+
+    print("adding support for kustomization file to", target)
+    os.makedirs(target_dir, exist_ok=True)
+    urllib.request.urlretrieve("https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/kustomization.json", target)
+
+add_kustomize()

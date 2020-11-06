@@ -104,6 +104,12 @@ licenses = [{
     "licensor": "Shu Kutsuzawa cappyzawa@yahoo.ne.jp",
     "website": "https://github.com/cappyzawa/concourse-pipeline-jsonschema",
     "year": "2020",
+}, {
+    "license": "Apache-2.0",
+    "component": "kustomization.yaml from \"JSON Schema Store\"",
+    "licensor": "Mads Kristensen",
+    "website": "https://www.schemastore.org",
+    "year": "2015-current",
 }]
 
 for mod in mods:

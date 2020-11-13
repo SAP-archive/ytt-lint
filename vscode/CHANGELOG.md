@@ -2,6 +2,10 @@
 
 All notable changes to the "ytt-lint" extension will be documented in this file.
 
+### 0.2.2 - GKE
+
+- support kubernetes auth plugins when pulling schema from k8s (e.g. required for GKE clusters)
+
 ### 0.2.1 - kustomize
 
 - add schema for Kustomization

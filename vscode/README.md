@@ -24,6 +24,10 @@ Everything
 
 ## Release Notes
 
+### 0.3.1 - autoimport
+
+- bugfix release
+
 ### 0.3.0 - autoimport
 
 - schema can now be imported directly from CRD files. From the command-line use the `--autoimport` flag, in vscode right-click a CRD file (or folder with multiple CRD files) and select `ytt-lint: Import crd schemas from current file or folder`.

@@ -119,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
 		if (activeEditor == null) {
 			return;
 		}
-		if (activeEditor.document.languageId != "yaml") {
+		if (["yaml", "ytt"].indexOf(activeEditor.document.languageId) < 0) {
 			return;
 		}
 		let doc = activeEditor.document;

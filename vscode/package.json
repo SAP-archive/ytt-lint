@@ -26,7 +26,8 @@
 	"license": "Apache-2.0",
 	"activationEvents": [
 		"onCommand:extension.pullSchemaK8S",
-		"onLanguage:yaml"
+		"onLanguage:yaml",
+		"onLanguage:ytt"
 	],
 	"main": "./out/extension.js",
 	"contributes": {

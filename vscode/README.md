@@ -24,6 +24,11 @@ Everything
 
 ## Release Notes
 
+### 0.3.0 - autoimport
+
+- schema can now be imported directly from CRD files. From the command-line use the `--autoimport` flag, in vscode right-click a CRD file (or folder with multiple CRD files) and select `ytt-lint: Import crd schemas from current file or folder`.
+- added option to select kubeconfig (and context) when pulling schema from k8s via extension
+
 ### 0.2.2 - GKE
 
 - support kubernetes auth plugins when pulling schema from k8s (e.g. required for GKE clusters)

@@ -21,11 +21,12 @@ var file, rootFolder string
 var excludeList []string
 
 func main() {
-	var pedantic, pullFromK8S bool
+	var pedantic, pullFromK8S, autoImport bool
 	var pullKubeconfig, pullContext string
 	flag.StringVar(&file, "f", "-", "File to validate")
 	flag.StringVar(&rootFolder, "root", "", "Root folder for validation (defaults to directory containing target file)")
 	flag.BoolVar(&pedantic, "p", false, "Use pedantic linting mode")
+	flag.BoolVar(&autoImport, "autoimport", false, "Automatically import schema of every custom resource defintion found during linting")
 	flag.BoolVar(&pullFromK8S, "pull-from-k8s", false, "Pull crd schemas from Kubernetes cluster")
 	flag.StringVar(&pullKubeconfig, "kubeconfig", "", "path to kubeconfig (used only for --pull-from-k8s)")
 	flag.StringVar(&pullContext, "context", "", "context inside kubeconfig (used only for --pull-from-k8s)")
@@ -71,7 +72,7 @@ func main() {
 	}
 
 	if stdin {
-		errors = lintReader(os.Stdin, file)
+		errors = lintReader(os.Stdin, file, autoImport)
 	} else {
 		err := filepath.Walk(file, func(path string, info os.FileInfo, _ error) error {
 			if isFileExcluded(path) {
@@ -91,7 +92,7 @@ func main() {
 				os.Exit(1)
 			}
 			defer fp.Close()
-			fileErrors := lintReader(fp, path)
+			fileErrors := lintReader(fp, path, autoImport)
 			errors = append(errors, fileErrors...)
 
 			return nil
@@ -107,14 +108,14 @@ func main() {
 	formatter.Format(os.Stdout, errors)
 }
 
-func lintReader(in io.Reader, filename string) []yttlint.LinterError {
+func lintReader(in io.Reader, filename string, autoImport bool) []yttlint.LinterError {
 	reader := bufio.NewReader(in)
 	data, err := ioutil.ReadAll(reader)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 		os.Exit(1)
 	}
-	return linter.Lint(string(data), filename)
+	return linter.Lint(string(data), filename, autoImport)
 }
 
 func getRootFolder() string {

@@ -168,7 +168,7 @@ type Linter struct {
 }
 
 // Lint applies linting to a given ytt template
-func (l *Linter) Lint(data, filename string) (errors []LinterError) {
+func (l *Linter) Lint(data, filename string, autoImport bool) (errors []LinterError) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintf(os.Stderr, "Recovered '%v' while linting %s \n", r, filename)
@@ -178,13 +178,13 @@ func (l *Linter) Lint(data, filename string) (errors []LinterError) {
 			}}
 		}
 	}()
-	errors = l.lint(data, filename)
+	errors = l.lint(data, filename, autoImport)
 	return
 }
 
 var helmChartRegex = regexp.MustCompile("{{")
 
-func (l *Linter) lint(data, filename string) []LinterError {
+func (l *Linter) lint(data, filename string, autoImport bool) []LinterError {
 	helm := helmChartRegex.FindStringIndex(data)
 	if helm != nil {
 		firstHelmLine := strings.Count(data[:helm[0]], "\n") + 1
@@ -272,6 +272,13 @@ func (l *Linter) lint(data, filename string) []LinterError {
 	//fmt.Printf("%s\n", schemaBytes)
 
 	errors := make([]LinterError, 0)
+
+	if autoImport {
+		err = importCRDs(filename, newVal.(*yamlmeta.DocumentSet))
+		if err != nil {
+			panic(fmt.Errorf("autoimport failed: %w", err))
+		}
+	}
 
 	for _, doc := range newVal.(*yamlmeta.DocumentSet).Items {
 		gvk, item := extractKind(doc)

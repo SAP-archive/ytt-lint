@@ -106,13 +106,13 @@ func TestValidate(t *testing.T) {
 			linter := &Linter{
 				Pedantic: false,
 			}
-			errors := linter.Lint(string(data), "test")
+			errors := linter.Lint(string(data), "test", false)
 			g.Expect(errors).To(ConsistOf(testCase.nonPedanticErrors))
 
 			linter = &Linter{
 				Pedantic: true,
 			}
-			errors = linter.Lint(string(data), "test")
+			errors = linter.Lint(string(data), "test", false)
 			g.Expect(errors).To(ConsistOf(append(testCase.nonPedanticErrors, testCase.pedanticErrors...)))
 		})
 

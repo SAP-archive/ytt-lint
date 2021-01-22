@@ -98,6 +98,12 @@ func (importer *importerImpl) ImportV1Beta1(crd apiextensionsv1beta1.CustomResou
 	kind := crd.Spec.Names.Kind
 	group := crd.Spec.Group
 
+	if len(crd.Spec.Versions) == 0 && crd.Spec.Version != "" {
+		crd.Spec.Versions = []apiextensionsv1beta1.CustomResourceDefinitionVersion{{
+			Name: crd.Spec.Version,
+		}}
+	}
+
 	for _, version := range crd.Spec.Versions {
 		var schema *apiextensionsv1beta1.JSONSchemaProps
 		if version.Schema == nil || version.Schema.OpenAPIV3Schema == nil {

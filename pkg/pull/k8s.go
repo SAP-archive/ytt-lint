@@ -18,14 +18,23 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func Pull() error {
+func Pull(kubeconfigPath, contextName string) error {
 	usr, err := user.Current()
 	if err != nil {
 		return fmt.Errorf("user.Current(): %w", err)
 	}
 	schemaDir := path.Join(usr.HomeDir, ".ytt-lint", "schema", "k8s")
 
-	kubeConfig := clientcmd.NewNonInteractiveDeferredLoadingClientConfig(clientcmd.NewDefaultClientConfigLoadingRules(), &clientcmd.ConfigOverrides{})
+	var kubeConfig clientcmd.ClientConfig
+	if kubeconfigPath != "" {
+		c, err := clientcmd.LoadFromFile(kubeconfigPath)
+		if err != nil {
+			return fmt.Errorf("clientcmd.LoadFromFile(%s): %w", kubeconfigPath, err)
+		}
+		kubeConfig = clientcmd.NewNonInteractiveClientConfig(*c, contextName, &clientcmd.ConfigOverrides{}, nil)
+	} else {
+		kubeConfig = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(clientcmd.NewDefaultClientConfigLoadingRules(), &clientcmd.ConfigOverrides{})
+	}
 	config, err := kubeConfig.ClientConfig()
 	if err != nil {
 		return fmt.Errorf("kubeConfig.ClientConfig(): %w", err)

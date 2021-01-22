@@ -22,16 +22,19 @@ var excludeList []string
 
 func main() {
 	var pedantic, pullFromK8S bool
+	var pullKubeconfig, pullContext string
 	flag.StringVar(&file, "f", "-", "File to validate")
 	flag.StringVar(&rootFolder, "root", "", "Root folder for validation (defaults to directory containing target file)")
 	flag.BoolVar(&pedantic, "p", false, "Use pedantic linting mode")
 	flag.BoolVar(&pullFromK8S, "pull-from-k8s", false, "Pull crd schemas from Kubernetes cluster")
+	flag.StringVar(&pullKubeconfig, "kubeconfig", "", "path to kubeconfig (used only for --pull-from-k8s)")
+	flag.StringVar(&pullContext, "context", "", "context inside kubeconfig (used only for --pull-from-k8s)")
 	outputFormat := flag.String("o", "human", "Output format: either human or json")
 	flag.Parse()
 
 	if pullFromK8S {
 		fmt.Println("Pulling from k8s...")
-		err := pull.Pull()
+		err := pull.Pull(pullKubeconfig, pullContext)
 		if err != nil {
 			fmt.Printf("Error: %v\n", err)
 			os.Exit(1)

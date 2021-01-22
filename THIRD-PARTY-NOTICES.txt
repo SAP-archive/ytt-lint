@@ -37,6 +37,13 @@ License: MIT
 <year> = unspecified
 <copyright holders> = Microsoft Corporation
 
+Component: @types/yaml 1.9.7
+Licensor: Microsoft Corporation
+Website: https://github.com/eemeli/yaml#readme
+License: MIT
+<year> = unspecified
+<copyright holders> = Microsoft Corporation
+
 Component: @typescript-eslint/eslint-plugin 2.19.0
 Licensor: TypeScript ESLint and other contributors
 Website: https://github.com/typescript-eslint/typescript-eslint#readme
@@ -116,17 +123,17 @@ Licensor: The Kubernetes Authors
 Website: https://github.com/kubernetes/kubernetes/blob/master/api/openapi-spec/swagger.json
 License: Apache-2.0
 
+Component: kustomization.yaml from "JSON Schema Store"
+Licensor: Mads Kristensen
+Website: https://www.schemastore.org
+License: Apache-2.0
+
 Component: mocha 8.1.0
 Licensor: TJ Holowaychuk
 Website: https://mochajs.org/
 License: MIT
 <year> = 2011-2020
 <copyright holders> = TJ Holowaychuk
-
-Component: schemastore
-Licensor: Mads Kristensen
-Website: https://www.schemastore.org
-License: Apache-2.0
 
 Component: The Visual Studio Code Extension Manager
 Licensor: Microsoft Corporation
@@ -153,6 +160,13 @@ Website: https://github.com/Microsoft/vscode-test#readme
 License: MIT
 <year> = unspecified
 <copyright holders> = Visual Studio Code Team
+
+Component: yaml 1.10.0
+Licensor: Eemeli Aro
+Website: https://eemeli.org/yaml/
+License: ISC
+<YEAR> = 2018
+<OWNER> = Eemeli Aro
 
 
 ------------------------------ Apache-2.0 ------------------------------

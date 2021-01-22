@@ -103,5 +103,15 @@
     },
     "vscode-test": {
         "year": "unspecified"
+    },
+    "0f10bab9eedc5d50183a6dbce9f76e8db974103bfd32d64674406dfeb7654ee7": {
+        "year": "2018"
+    },
+    "c2cfccb812fe482101a8f04597dfc5a9991a6b2748266c47ac91b6a5aae15383": {
+        "licensor": "Microsoft Corporation",
+        "year": ""
+    },
+    "@types/yaml": {
+        "year": "unspecified"
     }
 }

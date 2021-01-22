@@ -124,7 +124,9 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		let out = vscode.window.createOutputChannel(`ytt-lint schema import`);
-		let exec = child_process.execFile(EXEC_PATH, ['--autoimport', '-f', importPath, '--root', path.dirname(importPath)]);
+		let exec = child_process.execFile(EXEC_PATH, ['--autoimport', '-f', importPath, '--root', path.dirname(importPath)], {
+			env: Object.assign({YTT_LINT_SCHEMA_PATH: SCHEMA_PATH}, process.env)
+		});
 
 		exec.stdout?.on('data', (data) => {
 			out.append(data);

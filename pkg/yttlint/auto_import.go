@@ -7,7 +7,8 @@ import (
 	"github.com/SAP/ytt-lint/pkg/importer"
 	"github.com/k14s/ytt/pkg/yamlfmt"
 	"github.com/k14s/ytt/pkg/yamlmeta"
-	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"sigs.k8s.io/yaml"
 )
 
@@ -27,18 +28,26 @@ func importCRDs(filename string, docs *yamlmeta.DocumentSet) error {
 		if gvk.kind != "CustomResourceDefinition" {
 			continue
 		}
-		if gvk.version != "v1" {
-			fmt.Fprintf(os.Stderr, "autoimport warning: found CustomResourceDefinition of unsupported version %s in file %s (currently supported is v1)\n", gvk.version, filename)
-			continue
-		}
 
 		asYaml := printer.PrintStr(&yamlmeta.DocumentSet{
 			Items: []*yamlmeta.Document{doc},
 		})
 
-		crd := apiextensionsv1.CustomResourceDefinition{}
-		yaml.Unmarshal([]byte(asYaml), &crd)
-		importer.ImportV1(crd)
+		switch gvk.version {
+		case "v1":
+			crd := v1.CustomResourceDefinition{}
+			yaml.Unmarshal([]byte(asYaml), &crd)
+			importer.ImportV1(crd)
+
+		case "v1beta1":
+			crd := v1beta1.CustomResourceDefinition{}
+			yaml.Unmarshal([]byte(asYaml), &crd)
+			importer.ImportV1Beta1(crd)
+
+		default:
+			fmt.Fprintf(os.Stderr, "autoimport warning: found CustomResourceDefinition of unsupported version %s in file %s (currently supported is v1 and v1beta1)\n", gvk.version, filename)
+		}
+
 	}
 	return nil
 }

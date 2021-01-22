@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 import * as child_process from 'child_process';
 import * as YAML from 'yaml';
+import * as path from 'path';
 import { promises as fs } from 'fs';
 
 function getExecPath(context: vscode.ExtensionContext) {
@@ -32,7 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('extension.pullSchemaK8S', async () => {
+	let disposablePull = vscode.commands.registerCommand('extension.pullSchemaK8S', async () => {
 
 		let kubeconfigEnv = process.env["KUBECONFIG"] ?? "~/.kube/config";
 
@@ -110,9 +111,40 @@ export function activate(context: vscode.ExtensionContext) {
 		out.show();
 	});
 
+	let disposableImport = vscode.commands.registerCommand('extension.importSchema', async (e) => {
+		let importPath: string
+		if (e) {
+			importPath = e.fsPath;
+		} else {
+			if (vscode.window.activeTextEditor === undefined) {
+				vscode.window.showErrorMessage("ytt-lint can't import schema: no editor window open/active");
+				return;
+			}
+			importPath = vscode.window.activeTextEditor?.document.uri.fsPath;
+		}
+
+		let out = vscode.window.createOutputChannel(`ytt-lint schema import`);
+		let exec = child_process.execFile(EXEC_PATH, ['--autoimport', '-f', importPath, '--root', path.dirname(importPath)]);
+
+		exec.stdout?.on('data', (data) => {
+			out.append(data);
+		});
+
+		exec.stderr?.on('data', (data) => {
+			out.append(data);
+		});
+
+		exec.on('close', (code) => {
+			out.appendLine(`Exit code: ${code}`);
+		});
+
+		out.show();
+	});
+
 	let diagnosticCollection = vscode.languages.createDiagnosticCollection('ytt-lint');
 	
-	context.subscriptions.push(disposable);
+	context.subscriptions.push(disposablePull);
+	context.subscriptions.push(disposableImport);
 	context.subscriptions.push(diagnosticCollection);
 
 	function lint() {

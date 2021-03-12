@@ -63,6 +63,9 @@ func (importer *importerImpl) ImportV1(crd apiextensionsv1.CustomResourceDefinit
 		dirname := path.Join(importer.schemaDir, group, version.Name)
 		filename := path.Join(dirname, strings.ToLower(kind)+".json")
 
+		if schema.Properties == nil {
+			schema.Properties = map[string]apiextensionsv1.JSONSchemaProps{}
+		}
 		schema.Properties["metadata"] = importer.metadataTemplateV1
 		if _, ok := schema.Properties["kind"]; !ok {
 			schema.Properties["kind"] = apiextensionsv1.JSONSchemaProps{
@@ -118,6 +121,9 @@ func (importer *importerImpl) ImportV1Beta1(crd apiextensionsv1beta1.CustomResou
 		dirname := path.Join(importer.schemaDir, group, version.Name)
 		filename := path.Join(dirname, strings.ToLower(kind)+".json")
 
+		if schema.Properties == nil {
+			schema.Properties = map[string]apiextensionsv1beta1.JSONSchemaProps{}
+		}
 		schema.Properties["metadata"] = importer.metadataTemplateV1Beta1
 		if _, ok := schema.Properties["kind"]; !ok {
 			schema.Properties["kind"] = apiextensionsv1beta1.JSONSchemaProps{

@@ -7,9 +7,12 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/adrg/strutil"
+	"github.com/adrg/strutil/metrics"
 	"github.com/k14s/ytt/pkg/cmd/core"
 	"github.com/k14s/ytt/pkg/files"
 	"github.com/k14s/ytt/pkg/template"
@@ -598,7 +601,7 @@ func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.J
 						subErrors := l.isSubset(defs, &val, additionalPropertiesSchema, fmt.Sprintf("%s.%s", path, key))
 						errors = append(errors, subErrors...)
 					} else {
-						errors = append(errors, appendLocationIfKnownf(&val, "%s.%s additional properties are not permitted", path, key))
+						errors = append(errors, generateAdditionalPropertiesError(&val, path, key, schema.Properties))
 					}
 				}
 			}
@@ -695,6 +698,58 @@ func appendLocationIfKnownf(object interface{}, format string, a ...interface{})
 	}
 
 	return lintError
+}
+
+type typoCandidate struct {
+	similarity float64
+	key        string
+}
+type typoCandidateList []typoCandidate
+
+func (tcl typoCandidateList) Len() int {
+	return len(tcl)
+}
+
+func (tcl typoCandidateList) Swap(i, j int) {
+	tcl[i], tcl[j] = tcl[j], tcl[i]
+}
+
+func (s typoCandidateList) Less(i, j int) bool {
+	return s[i].similarity < s[j].similarity
+}
+
+func generateAdditionalPropertiesError(val *v1.JSONSchemaProps, path string, key string, schema map[string]v1.JSONSchemaProps) LinterError {
+	message := fmt.Sprintf("%s.%s additional properties are not permitted", path, key)
+
+	alternatives := []string{}
+	candidates := typoCandidateList{}
+
+	for candidate := range schema {
+		similarity := strutil.Similarity(strings.ToLower(key), strings.ToLower(candidate), metrics.NewHamming())
+		if similarity < 0.25 {
+			continue
+		}
+		candidates = append(candidates, typoCandidate{
+			similarity: similarity,
+			key:        candidate,
+		})
+	}
+
+	sort.Sort(candidates)
+
+	if len(candidates) > 5 {
+		candidates = candidates[:5]
+	}
+
+	for _, candidate := range candidates {
+		alternatives = append(alternatives, candidate.key)
+	}
+
+	if len(alternatives) != 0 {
+		message = fmt.Sprintf("%s. Did you mean: %s?", message, strings.Join(alternatives, ", "))
+	}
+
+	return appendLocationIfKnownf(val, message)
 }
 
 func newAPIandLib(filename string, replaceNodeFunc tplcore.StarlarkFunc, loader yttlibrary.DataLoader) (yttlibrary.API, *workspace.Library) {

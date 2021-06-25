@@ -113,5 +113,21 @@
     },
     "@types/yaml": {
         "year": "unspecified"
+    },
+    "24653fd8a39354396da1a265d68316399edc39b1df48c5866d55f9f06484fa9a": {
+        "license": "MIT",
+        "licensor": "Sam Ghods",
+        "year": "2014"
+    },
+    "sigs.k8s.io/yaml": {
+        "website": "https://github.com/kubernetes-sigs/yaml"
+    },
+    "b498052ec363d4e01abb1ea745843de470b7fb14a8d16ca82205dfb17beaccdb": {
+        "license": "MIT",
+        "licensor": "Adrian-George Bostan <adrg@epistack.com>",
+        "year": "2019"
+    },
+    "github.com/adrg/strutil": {
+        "website": "https://github.com/adrg/strutil"
     }
 }

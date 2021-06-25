@@ -3,6 +3,7 @@ module github.com/SAP/ytt-lint
 go 1.13
 
 require (
+	github.com/adrg/strutil v0.2.3
 	github.com/imdario/mergo v0.3.8 // indirect
 	github.com/k14s/ytt v0.28.0
 	github.com/onsi/gomega v1.9.0

@@ -70,6 +70,13 @@ License: MIT
 <year> = unspecified
 <copyright holders> = Nicholas C. Zakas
 
+Component: github.com/adrg/strutil v0.2.3
+Licensor: Adrian-George Bostan <adrg@epistack.com>
+Website: https://github.com/adrg/strutil
+License: MIT
+<year> = 2019
+<copyright holders> = Adrian-George Bostan <adrg@epistack.com>
+
 Component: github.com/k14s/ytt v0.28.0
 Licensor: Pivotal Software, Inc.
 Website: https://get-ytt.io/
@@ -134,6 +141,13 @@ Website: https://mochajs.org/
 License: MIT
 <year> = 2011-2020
 <copyright holders> = TJ Holowaychuk
+
+Component: sigs.k8s.io/yaml v1.1.0
+Licensor: Sam Ghods
+Website: https://github.com/kubernetes-sigs/yaml
+License: MIT
+<year> = 2014
+<copyright holders> = Sam Ghods
 
 Component: The Visual Studio Code Extension Manager
 Licensor: Microsoft Corporation

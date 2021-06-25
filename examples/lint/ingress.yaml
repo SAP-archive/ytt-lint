@@ -29,5 +29,5 @@ spec:
           servicePort: 6
           resource:
             name: test
-
-
+            KinD: blub #! detect case mismatch and suggest correct case
+            kynd: blub #! detect typos and suggest alternatives

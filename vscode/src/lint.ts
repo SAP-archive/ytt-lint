@@ -30,11 +30,11 @@ export function lint(context: vscode.ExtensionContext, activeEditor: vscode.Text
     }
     // TODO: use spwan and then stream
     let linter = child_process.execFile(EXEC_PATH, args, {
-        env: Object.assign({YTT_LINT_SCHEMA_PATH: SCHEMA_PATH}, process.env)
+        env: Object.assign({ YTT_LINT_SCHEMA_PATH: SCHEMA_PATH }, process.env)
     }, (error, stdout, stderr) => {
         console.log('Done linting:', error, stdout, stderr);
         let errors = JSON.parse(stdout);
-        
+
         errors.forEach((error: { pos: string; msg: string; }) => {
             let [file, l] = error.pos.split(":");
             if (file != doc.fileName) {

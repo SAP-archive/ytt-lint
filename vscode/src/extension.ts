@@ -8,7 +8,7 @@ import { lint } from './lint';
 
 export function getExecPath(context: vscode.ExtensionContext) {
 	var os: string = process.platform;
-	if (os  === "win32") {
+	if (os === "win32") {
 		os = "windows";
 	}
 	var path = context.asAbsolutePath(`bin/ytt-lint-${os}`);
@@ -36,10 +36,10 @@ export function activate(context: vscode.ExtensionContext) {
 	// The commandId parameter must match the command field in package.json
 	let disposablePull = vscode.commands.registerCommand('extension.pullSchemaK8S', _ => pullFromK8s(context));
 
-	let disposableImport = vscode.commands.registerCommand('extension.importSchema', e => autoImport(context, e) );
+	let disposableImport = vscode.commands.registerCommand('extension.importSchema', e => autoImport(context, e));
 
 	let diagnosticCollection = vscode.languages.createDiagnosticCollection('ytt-lint');
-	
+
 	context.subscriptions.push(disposablePull);
 	context.subscriptions.push(disposableImport);
 	context.subscriptions.push(diagnosticCollection);
@@ -77,4 +77,4 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() { }

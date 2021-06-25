@@ -41,7 +41,7 @@ export async function pullFromK8s(extensionContext: vscode.ExtensionContext) {
         context: string;
     }
 
-    let content = await fs.readFile(kubeconfigPath, {encoding: "utf-8"});
+    let content = await fs.readFile(kubeconfigPath, { encoding: "utf-8" });
     let parsedKubeconfig = YAML.parse(content);
     let context: string;
     if (parsedKubeconfig.contexts.length == 1) {

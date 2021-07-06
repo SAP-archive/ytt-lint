@@ -625,7 +625,18 @@ func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.J
 		}
 
 	case "string":
-		if subSchema.Type != "string" {
+		if subSchema.Type == "string" {
+			if schema.Pattern != "" {
+				pattern, err := regexp.Compile("^" + schema.Pattern + "$")
+				if err != nil {
+					errors = append(errors, appendLocationIfKnownf(subSchema, "%s could not validate value, schema contains invalid pattern: %s", path, schema.Pattern))
+				} else {
+					if !pattern.MatchString(extractStringFromSchema(subSchema)) {
+						errors = append(errors, appendLocationIfKnownf(subSchema, "%s invalid value. Expected to match pattern: %s", path, schema.Pattern))
+					}
+				}
+			}
+		} else {
 			format := schema.Format
 
 			if format == "int-or-string" {
@@ -647,8 +658,8 @@ func (l *Linter) isSubset(defs v1.JSONSchemaDefinitions, subSchema, schema *v1.J
 					errors = append(errors, appendLocationIfKnownf(subSchema, "%s expected string got: %s", path, subSchema.Type))
 				}
 			}
-
 		}
+
 	case "integer":
 		if subSchema.Type != "integer" {
 			if subSchema.Type == "magic" {
@@ -681,6 +692,15 @@ func extractMagicTypeFromSchema(schema *v1.JSONSchemaProps) *magic.MagicType {
 		panic(err)
 	}
 	return magic
+}
+
+func extractStringFromSchema(schema *v1.JSONSchemaProps) string {
+	var data = ""
+	err := json.Unmarshal(schema.Default.Raw, &data)
+	if err != nil {
+		panic(err)
+	}
+	return data
 }
 
 func appendLocationIfKnownf(object interface{}, format string, a ...interface{}) LinterError {

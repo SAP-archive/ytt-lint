@@ -31,10 +31,13 @@ def findRefs(o):
     else:
         raise Exception("Unsupported type %s" % type(o).__name__)
 
+label_regex = r'(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?'
 
 def extraceSchema(file):
     schema = json.load(open(file))
     definitions = schema["definitions"]
+
+    definitions["io.k8s.apimachinery.pkg.apis.meta.v1.ObjectMeta"]["properties"]["labels"]["additionalProperties"]["pattern"] = label_regex
 
     for (name, root) in definitions.items():
         if "x-kubernetes-group-version-kind" not in root:

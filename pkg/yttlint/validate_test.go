@@ -75,12 +75,15 @@ func TestValidate(t *testing.T) {
 	}, {
 		filename: "../../examples/lint/empty-pod.yaml",
 		nonPedanticErrors: []LinterError{{
-			Msg: ".spec.containers expected array got: null",
+			Msg: ".metadata.labels.label invalid value. Expected to match pattern: (([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?",
 			Pos: "test:7",
+		}, {
+			Msg: ".spec.containers expected array got: null",
+			Pos: "test:9",
 		}},
 		pedanticErrors: []LinterError{{
 			Msg: ".spec.imagePullSecrets expected array got a computed value",
-			Pos: "test:8",
+			Pos: "test:10",
 		}},
 	}, {
 		filename: "../../examples/lint/concourse-caches.yaml",

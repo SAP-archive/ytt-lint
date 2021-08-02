@@ -1,0 +1,9 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: ytt lint
+Upstream-Contact: Philipp Stehle <philipp.stehle@sap.com>
+Source: https://github.com/SAP/ytt-lint
+
+Files: *
+Copyright: 2019-2021 SAP SE or an SAP affiliate company and ytt lint contributors
+License: Apache-2.0
+

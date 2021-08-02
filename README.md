@@ -1,3 +1,4 @@
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP/ytt-lint)](https://api.reuse.software/info/github.com/SAP/ytt-lint)
 
 # ytt-lint
 
